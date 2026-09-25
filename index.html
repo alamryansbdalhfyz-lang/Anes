@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق التواصل الخاص بي</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #e5ddd5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #075e54;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .message.sent {
+            background: #dcf8c6;
+            color: #000;
+            align-self: flex-start;
+            border-bottom-right-radius: 2px;
+        }
+        .message.received {
+            background: #ffffff;
+            color: #000;
+            align-self: flex-end;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #e0e0e0;
+        }
+        .sender-name {
+            font-size: 11px;
+            margin-bottom: 3px;
+            color: #075e54;
+            font-weight: bold;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #f0f0f0;
+            gap: 8px;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        .chat-input button {
+            background: #128c7e;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+
+    <!-- تضمين مكتبات Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        غرفة المحادثة 💬
+    </div>
+    
+    <div class="chat-messages" id="chatBox"></div>
+    
+    <div class="chat-input">
+        <input type="text" id="userInput" placeholder="اكتب رسالتك..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">إرسال</button>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "ضع_API_KEY_هنا",
+        authDomain: "اسم_مشروعك.firebaseapp.com",
+        databaseURL: "https://اسم_مشروعك-default-rtdb.firebaseio.com",
+        projectId: "اسم_مشروعك",
+        storageBucket: "اسم_مشروعك.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:abcdef"
+    };
+
+    if (firebaseConfig.apiKey !== "ضع_API_KEY_هنا") {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const chatBox = document.getElementById('chatBox');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message sent';
+        msgDiv.textContent = text;
+        chatBox.appendChild(msgDiv);
+        
+        input.value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    }
+</script>
+
+</body>
+</html>
