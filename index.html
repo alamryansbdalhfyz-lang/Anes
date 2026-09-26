@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق المحادثة والذكاء الاصطناعي</title>
+    
+    <!-- إعدادات تطبيق الويب التقدمي (PWA) للأيقونة والتثبيت -->
+    <meta name="theme-color" content="#0b141a">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%A3%D9%86%D8%B3%20%D9%84%D9%84%D9%85%D8%AD%D8%A7%D8%AF%D8%AB%D8%A9%22%2C%22short_name%22%3A%22AnesApp%22%2C%22start_url%22%3A%22%2FAnes%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b141a%22%2C%22theme_color%22%3A%22%2300a884%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F6134%2F6134346.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+
     <style>
         :root {
             --bg-color: #0b141a;
@@ -146,6 +151,12 @@
             color: white;
         }
 
+        .btn-install {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            display: none; /* يظهر فقط عندما يكون التطبيق قابلاً للتثبيت */
+        }
+
         /* شاشات المحادثة */
         .chat-screen {
             display: none;
@@ -279,6 +290,13 @@
                 <p>العمر: 14 سنة | محافظة إب 🇾🇪</p>
             </div>
 
+            <!-- زر تثبيت التطبيق على الهاتف -->
+            <div class="section-box" id="install-box" style="display: none;">
+                <h3>📲 تثبيت التطبيق على هاتفك</h3>
+                <p style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">اجعل التطبيق يظهر كأيقونة مستقلة على شاشة هاتفك الرئيسية.</p>
+                <button class="btn-main btn-install" id="install-btn" style="display: block;">تثبيت التطبيق الآن ⚡</button>
+            </div>
+
             <!-- بطاقة المستخدم -->
             <div class="user-card">
                 <div>رقمك الفريد (ID)</div>
@@ -375,6 +393,25 @@
         let currentChannel = "";
         let pubnub;
         let chatHistory = {};
+
+        // ميزة التثبيت على شاشة الهاتف (PWA)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById("install-box").style.display = "block";
+        });
+
+        document.getElementById("install-btn").addEventListener("click", async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById("install-box").style.display = "none";
+                }
+                deferredPrompt = null;
+            }
+        });
 
         // توليد معرف فريد للمستخدم
         if (!myID) {
@@ -582,7 +619,7 @@
         // --- قسم الاقتراحات والتنقل ---
         function sendSuggestion() {
             const input = document.getElementById("suggestion-input");
-            const text = input.value.trim();
+            const text = input.value.prompt || input.value.trim();
             if (!text) { alert("يرجى كتابة الاقتراح!"); return; }
 
             pubnub.publish({
