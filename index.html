@@ -305,13 +305,33 @@
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            // استخدام ميزة القراءة المباشرة لتفادي حظر السيرفرات
             const reader = new FileReader();
             reader.onload = function(e) {
-                pubnub.publish({
-                    channel: currentRoom,
-                    message: { sender: username, type: 'image', content: e.target.result, time: timeStr }
-                });
+                const img = new Image();
+                img.onload = function() {
+                    // تصغير حجم الصورة حتى لا يتجاوز الحجم المسموح
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 400;
+                    const scale = maxWidth / img.width;
+                    
+                    if (scale < 1) {
+                        canvas.width = maxWidth;
+                        canvas.height = img.height * scale;
+                    } else {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                    }
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+                    pubnub.publish({
+                        channel: currentRoom,
+                        message: { sender: username, type: 'image', content: compressedBase64, time: timeStr }
+                    });
+                };
+                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
 
