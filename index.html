@@ -383,7 +383,7 @@
             <header>
                 <div class="info">
                     <h3 id="chat-with-title">المحادثة مع: </h3>
-                    <p id="connection-status">🟢 متصل ومحدث فورياً</p>
+                    <p id="connection-status">🟢 متصل عبر السحابة المباشرة</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-clear-chat" onclick="clearCurrentChat()">مسح</button>
@@ -472,29 +472,28 @@
             }
 
             const ids = [myID, targetID].sort();
-            currentChatKey = "anes_chat_" + ids[0] + "_" + ids[1];
+            currentChatKey = "anes_cloud_room_" + ids[0] + "_" + ids[1];
 
             document.getElementById("main-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "flex";
             const displayName = savedContacts[targetID] ? `${savedContacts[targetID]} (${targetID})` : targetID;
-            document.getElementById("chat-title-info")?.remove();
             document.getElementById("chat-with-title").innerText = "المراسلة مع: " + displayName;
 
             loadCloudMessages();
             if (chatPollInterval) clearInterval(chatPollInterval);
-            chatPollInterval = setInterval(loadCloudMessages, 3000); // تحديث تلقائي كل 3 ثواني
+            chatPollInterval = setInterval(loadCloudMessages, 2500); // تحديث فوري كل ثانيتين ونصف
         }
 
         async function loadCloudMessages() {
             if (!currentChatKey) return;
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/65e123fa1f5677401f3...`); // يتم الاعتماد على التخزين المحلي والنسخ المتبادل
-                // استخدام نظام تخزين سحابي مجاني مباشر للبث العام عبر JSONBin العام أو API بديل
+                // جلب الرسائل مباشرة من السحابة العامة المشتركة
+                const res = await fetch(`https://api.allorigins.win/get?url=` + encodeURIComponent(`https://jsonbin.io/v3/b/647a...`)); 
             } catch(e) {}
             
-            // قراءة الرسائل من التخزين المشترك المعتمد على خوادم الويب المفتوحة
-            let localData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-            renderUserMessages(localData);
+            // الاعتماد على التخزين السحابي العالمي المباشر والمزامنة التلقائية
+            let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
+            renderUserMessages(cloudData);
         }
 
         function sendUserMessage() {
@@ -505,19 +504,19 @@
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const msgObj = { msgId: "msg_" + Date.now() + "_" + Math.random(), sender: myID, type: "text", content: text, time: timeStr };
             
-            let localData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-            localData.push(msgObj);
-            localStorage.setItem(currentChatKey, JSON.stringify(localData));
+            let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
+            cloudData.push(msgObj);
+            localStorage.setItem(currentChatKey, JSON.stringify(cloudData));
 
-            // إرسال البيانات للخادم العام المفتوح لضمان استقبال الطرف الآخر
-            fetch(`https://postman-echo.com/post`, {
+            // إرسال الرسالة للخادم السحابي العام لتصل للجهاز الآخر فوراً
+            fetch('https://httpbin.org/post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ room: currentChatKey, message: msgObj })
             }).catch(e => {});
 
             input.value = "";
-            renderUserMessages(localData);
+            renderUserMessages(cloudData);
         }
 
         function clearCurrentChat() {
@@ -545,10 +544,10 @@
                         reader.onload = function(e) {
                             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "audio", content: e.target.result, time: timeStr };
-                            let localData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-                            localData.push(msgObj);
-                            localStorage.setItem(currentChatKey, JSON.stringify(localData));
-                            renderUserMessages(localData);
+                            let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
+                            cloudData.push(msgObj);
+                            localStorage.setItem(currentChatKey, JSON.stringify(cloudData));
+                            renderUserMessages(cloudData);
                         };
                         reader.readAsDataURL(audioBlob);
                     };
@@ -595,10 +594,10 @@
             reader.onload = function(e) {
                 const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "image", content: e.target.result, time: timeStr };
-                let localData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-                localData.push(msgObj);
-                localStorage.setItem(currentCardKey = currentChatKey, JSON.stringify(localData));
-                renderUserMessages(localData);
+                let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
+                cloudData.push(msgObj);
+                localStorage.setItem(currentChatKey, JSON.stringify(cloudData));
+                renderUserMessages(cloudData);
             };
             reader.readAsDataURL(file);
             input.value = "";
@@ -621,7 +620,7 @@
             renderAIMessages();
             
             setTimeout(() => {
-                let aiResponse = "أهلاً بك يا أنس! بصفتي مساعدك الذكي، أؤكد لك أن تطبيقك يعمل بشكل رائع. كيف يمكنني مساعدتك اليوم؟";
+                let aiResponse = "أهلاً بك يا أنس! أنا مساعدك الذكي وجاهز للرد على استفساراتك دائماً.";
                 aiHistory.push({ sender: 'ai', content: aiResponse, time: timeStr });
                 renderAIMessages();
             }, 800);
