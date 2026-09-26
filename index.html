@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق المحادثة والذكاء الاصطناعي</title>
+    <style>
+        :root {
+            --bg-color: #e5ddd5;
+            --chat-bg: #efeae2;
+            --header-bg: #075e54;
+            --my-msg-bg: #dcf8c6;
+            --other-msg-bg: #ffffff;
+            --text-color: #000000;
+        }
+
+        body.dark-theme {
+            --bg-color: #0d1418;
+            --chat-bg: #131c21;
+            --header-bg: #1f2c34;
+            --my-msg-bg: #005c4b;
+            --other-msg-bg: #202c33;
+            --text-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        #login-screen, #chat-screen {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background: var(--chat-bg);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            color: var(--text-color);
+        }
+
+        #login-screen {
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: var(--header-bg);
+            color: white;
+            text-align: center;
+        }
+
+        #login-screen h2 { margin-bottom: 20px; }
+
+        #login-screen input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #login-screen button {
+            width: 100%;
+            padding: 12px;
+            background: #25d366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header .info h3 { font-size: 16px; }
+        header .info p { font-size: 12px; opacity: 0.8; }
+
+        header .header-btns button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .message.my-msg { background-color: var(--my-msg-bg); align-self: flex-start; }
+        .message.other-msg { background-color: var(--other-msg-bg); align-self: flex-end; }
+        .message.ai-msg { background-color: #0288d1; color: white; align-self: center; width: 90%; text-align: center; }
+
+        .message .sender { font-size: 11px; font-weight: bold; color: #075e54; margin-bottom: 4px; display: block; }
+        .dark-theme .message .sender { color: #25d366; }
+        .message.ai-msg .sender { color: #fff; }
+
+        .message .time { font-size: 9px; opacity: 0.6; display: block; text-align: left; margin-top: 4px; }
+
+        .message img, .message audio {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.05);
+            gap: 6px;
+            align-items: center;
+        }
+
+        #input-area input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .btn-action {
+            background-color: var(--header-bg);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-mic.recording {
+            background-color: #d32f2f;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #file-input { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-screen">
+        <h2>شات الذكاء الاصطناعي والميديا</h2>
+        <input type="text" id="username-input" placeholder="اسمك..." />
+        <input type="text" id="room-input" placeholder="اسم الغرفة (مثال: room99)" />
+        <button onclick="joinRoom()">دخول المحادثة</button>
+    </div>
+
+    <!-- شاشة المحادثة -->
+    <div id="chat-screen" style="display: none;">
+        <header>
+            <div class="info">
+                <h3 id="room-display">الغرفة: </h3>
+                <p id="user-display">أنت: </p>
+            </div>
+            <div class="header-btns">
+                <button onclick="toggleTheme()">🌓</button>
+                <button onclick="leaveRoom()">خروج</button>
+            </div>
+        </header>
+
+        <div id="messages"></div>
+
+        <div id="input-area">
+            <button class="btn-action" onclick="document.getElementById('file-input').click()">📁</button>
+            <input type="file" id="file-input" accept="image/*" onchange="uploadFromGallery(this)" />
+            
+            <button id="mic-btn" class="btn-action btn-mic" onclick="toggleRecording()">🎤</button>
+
+            <input type="text" id="msg-input" placeholder="اكتب رسالة (أو 'ذكاء' لـ AI)..." onkeypress="handleKeyPress(event)" />
+            <button class="btn-action" onclick="sendTextMessage()">➤</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.2.min.js"></script>
+    <script>
+        let pubnub;
+        let username = "";
+        let currentRoom = "";
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        function joinRoom() {
+            const uInput = document.getElementById('username-input').value.trim();
+            const rInput = document.getElementById('room-input').value.trim();
+
+            if (!uInput || !rInput) {
+                alert("يرجى كتابة الاسم واسم الغرفة أولاً!");
+                return;
+            }
+
+            username = uInput;
+            currentRoom = "room_" + rInput.toLowerCase();
+
+            pubnub = new PubNub({
+                publishKey: "demo",
+                subscribeKey: "demo",
+                userId: username + "_" + Math.floor(Math.random() * 1000)
+            });
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
+            document.getElementById('room-display').innerText = "الغرفة: " + rInput;
+            document.getElementById('user-display').innerText = "الاسم: " + username;
+
+            pubnub.addListener({
+                message: function(m) {
+                    displayMessage(m.message);
+                }
+            });
+
+            pubnub.subscribe({ channels: [currentRoom] });
+        }
+
+        async function sendTextMessage() {
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            pubnub.publish({
+                channel: currentRoom,
+                message: { sender: username, type: 'text', content: text, time: timeStr }
+            });
+
+            input.value = "";
+
+            const lowerText = text.toLowerCase();
+            if (lowerText.startsWith("ذكاء ") || lowerText.startsWith("ai ")) {
+                const promptQuery = text.replace(/^(ذكاء|ai)\s+/i, "");
+                
+                pubnub.publish({
+                    channel: currentRoom,
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "جاري التفكير...", time: timeStr }
+                });
+
+                try {
+                    const res = await fetch(`https://api.pollinations.ai/prompt/${encodeURIComponent(promptQuery)}?model=openai`);
+                    const aiAnswer = await res.text();
+
+                    pubnub.publish({
+                        channel: currentRoom,
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: aiAnswer || "عذراً لم أستطع الإجابة.", time: timeStr }
+                    });
+                } catch (err) {
+                    pubnub.publish({
+                        channel: currentRoom,
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.", time: timeStr }
+                    });
+                }
+            }
+        }
+
+        async function uploadFromGallery(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            pubnub.publish({
+                channel: currentRoom,
+                message: { sender: username, type: 'text', content: "⏳ جاري رفع الصورة من المعرض...", time: timeStr }
+            });
+
+            const apiKey = 'd822557e93bd0db4ca7dc621184fb24e';
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data && data.success) {
+                    pubnub.publish({
+                        channel: currentRoom,
+                        message: { sender: username, type: 'image', content: data.data.url, time: timeStr }
+                    });
+                } else {
+                    alert("فشل رفع الصورة.");
+                }
+            } catch (err) {
+                alert("حدث خطأ أثناء رفع الملف.");
+            }
+            
+            input.value = "";
+        }
+
+        async function toggleRecording() {
+            const micBtn = document.getElementById('mic-btn');
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            pubnub.publish({
+                                channel: currentRoom,
+                                message: { sender: username, type: 'audio', content: reader.result, time: timeStr }
+                            });
+                        };
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                } catch (err) {
+                    alert("يرجى إعطاء الصلاحية لاستخدام الميكروفون.");
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+            }
+        }
+
+        function displayMessage(msg) {
+            const messagesDiv = document.getElementById('messages');
+            const msgEl = document.createElement('div');
+            
+            if (msg.type === 'ai') {
+                msgEl.className = 'message ai-msg';
+            } else {
+                const isMe = (msg.sender === username);
+                msgEl.className = 'message ' + (isMe ? 'my-msg' : 'other-msg');
+            }
+
+            let contentHTML = `<span class="sender">${msg.sender}</span>`;
+            
+            if (msg.type === 'text' || msg.type === 'ai') {
+                contentHTML += msg.content;
+            } else if (msg.type === 'image') {
+                contentHTML += `<img src="${msg.content}" alt="صورة" />`;
+            } else if (msg.type === 'audio') {
+                contentHTML += `<audio src="${msg.content}" controls></audio>`;
+            }
+
+            contentHTML += `<span class="time">${msg.time || ''}</span>`;
+
+            msgEl.innerHTML = contentHTML;
+            messagesDiv.appendChild(msgEl);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendTextMessage();
+        }
+
+        function leaveRoom() {
+            if (pubnub) pubnub.unsubscribeAll();
+            document.getElementById('messages').innerHTML = "";
+            document.getElementById('chat-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
