@@ -6,21 +6,13 @@
     <title>تطبيق المحادثة والذكاء الاصطناعي</title>
     <style>
         :root {
-            --bg-color: #e5ddd5;
-            --chat-bg: #efeae2;
-            --header-bg: #075e54;
-            --my-msg-bg: #dcf8c6;
-            --other-msg-bg: #ffffff;
-            --text-color: #000000;
-        }
-
-        body.dark-theme {
-            --bg-color: #0d1418;
-            --chat-bg: #131c21;
-            --header-bg: #1f2c34;
+            --bg-color: #0b141a;
+            --chat-bg: #111b21;
+            --header-bg: #202c33;
             --my-msg-bg: #005c4b;
             --other-msg-bg: #202c33;
-            --text-color: #ffffff;
+            --text-color: #e9edef;
+            --accent-color: #00a884;
         }
 
         * {
@@ -36,7 +28,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background 0.3s;
+            color: var(--text-color);
         }
 
         #login-screen, #chat-screen {
@@ -46,64 +38,76 @@
             background: var(--chat-bg);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            color: var(--text-color);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         #login-screen {
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            background: var(--header-bg);
-            color: white;
+            padding: 25px;
             text-align: center;
         }
 
-        #login-screen h2 { margin-bottom: 20px; }
+        #login-screen h2 { margin-bottom: 10px; color: var(--accent-color); font-size: 24px; }
+        #login-screen p { margin-bottom: 25px; opacity: 0.8; font-size: 14px; }
 
         #login-screen input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid #2a3942;
+            background: #202c33;
+            color: white;
+            border-radius: 10px;
+            font-size: 15px;
             outline: none;
         }
 
-        #login-screen button {
+        .btn-main {
             width: 100%;
-            padding: 12px;
-            background: #25d366;
-            color: white;
+            padding: 14px;
+            background: var(--accent-color);
+            color: #111b21;
             border: none;
-            border-radius: 8px;
-            font-size: 18px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-global {
+            background: #0088cc;
+            color: white;
+        }
+
+        .divider {
+            margin: 15px 0;
+            opacity: 0.5;
+            font-size: 12px;
         }
 
         header {
             background-color: var(--header-bg);
-            color: white;
-            padding: 15px;
+            padding: 12px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #222d34;
         }
 
-        header .info h3 { font-size: 16px; }
-        header .info p { font-size: 12px; opacity: 0.8; }
+        header .info h3 { font-size: 16px; color: var(--accent-color); }
+        header .info p { font-size: 12px; opacity: 0.7; }
 
         header .header-btns button {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
             border: none;
             color: white;
-            padding: 6px 10px;
-            border-radius: 5px;
+            padding: 6px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            margin-left: 5px;
+            font-size: 13px;
         }
 
         #messages {
@@ -112,40 +116,54 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .message {
             max-width: 85%;
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 10px 14px;
+            border-radius: 12px;
             font-size: 14px;
             line-height: 1.4;
             word-wrap: break-word;
             position: relative;
         }
 
-        .message.my-msg { background-color: var(--my-msg-bg); align-self: flex-start; }
-        .message.other-msg { background-color: var(--other-msg-bg); align-self: flex-end; }
-        .message.ai-msg { background-color: #0288d1; color: white; align-self: center; width: 90%; text-align: right; }
+        .message.my-msg { background-color: var(--my-msg-bg); align-self: flex-start; border-top-right-radius: 0; }
+        .message.other-msg { background-color: var(--other-msg-bg); align-self: flex-end; border-top-left-radius: 0; }
+        .message.ai-msg { background-color: #1e3a5f; color: #e0f2fe; align-self: center; width: 92%; border-radius: 12px; }
 
-        .message .sender { font-size: 11px; font-weight: bold; color: #075e54; margin-bottom: 4px; display: block; }
-        .dark-theme .message .sender { color: #25d366; }
-        .message.ai-msg .sender { color: #fff; }
+        .message .sender { font-size: 11px; font-weight: bold; color: var(--accent-color); margin-bottom: 4px; display: block; }
+        .message.ai-msg .sender { color: #38bdf8; }
 
-        .message .time { font-size: 9px; opacity: 0.6; display: block; text-align: left; margin-top: 4px; }
+        .message .time { font-size: 10px; opacity: 0.6; display: block; text-align: left; margin-top: 5px; }
 
-        .message img, .message audio, .message video {
+        .message img, .message audio {
             max-width: 100%;
             border-radius: 8px;
-            margin-top: 5px;
+            margin-top: 6px;
+        }
+
+        #emoji-bar {
+            display: flex;
+            gap: 8px;
+            padding: 6px 10px;
+            background: #182229;
+            overflow-x: auto;
+        }
+
+        #emoji-bar span {
+            font-size: 20px;
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 5px;
         }
 
         #input-area {
             display: flex;
             padding: 10px;
-            background-color: rgba(0,0,0,0.05);
-            gap: 6px;
+            background-color: var(--header-bg);
+            gap: 8px;
             align-items: center;
         }
 
@@ -153,29 +171,44 @@
             flex: 1;
             padding: 10px 14px;
             border: none;
+            background: #2a3942;
+            color: white;
             border-radius: 20px;
             outline: none;
             font-size: 14px;
         }
 
         .btn-action {
-            background-color: var(--header-bg);
-            color: white;
+            background-color: transparent;
+            color: #8696a0;
             border: none;
-            padding: 10px 12px;
-            border-radius: 20px;
-            font-size: 13px;
+            font-size: 18px;
             cursor: pointer;
+            padding: 5px;
+        }
+
+        .btn-send {
+            background-color: var(--accent-color);
+            color: #111b21;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .btn-mic.recording {
-            background-color: #d32f2f;
+            color: #f44336;
             animation: pulse 1s infinite;
         }
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
 
@@ -185,25 +218,40 @@
 <body>
 
     <div id="login-screen">
-        <h2>شات الذكاء الاصطناعي والميديا</h2>
-        <input type="text" id="username-input" placeholder="اسمك..." />
-        <input type="text" id="room-input" placeholder="اسم الغرفة (مثال: room99)" />
-        <button onclick="joinRoom()">دخول المحادثة</button>
+        <h2>🔥 الشات الأسطوري</h2>
+        <p>دردشة عالمية وتوليد صور فورية بالذكاء الاصطناعي</p>
+        
+        <input type="text" id="username-input" placeholder="ادخل اسمك هنا..." />
+        
+        <button class="btn-main btn-global" onclick="joinGlobalRoom()">🌍 دخول الدردشة العالمية</button>
+        
+        <div class="divider">─── أو انضم لغرفة خاصة ───</div>
+        
+        <input type="text" id="room-input" placeholder="اسم الغرفة الخاصة..." />
+        <button class="btn-main" onclick="joinPrivateRoom()">🔒 دخول الغرفة الخاصة</button>
     </div>
 
     <div id="chat-screen" style="display: none;">
         <header>
             <div class="info">
-                <h3 id="room-display">الغرفة: </h3>
+                <h3 id="room-display">الدردشة: </h3>
                 <p id="user-display">أنت: </p>
             </div>
             <div class="header-btns">
-                <button onclick="toggleTheme()">🌓</button>
                 <button onclick="leaveRoom()">خروج</button>
             </div>
         </header>
 
         <div id="messages"></div>
+
+        <div id="emoji-bar">
+            <span onclick="sendEmoji('🔥')">🔥</span>
+            <span onclick="sendEmoji('😂')">😂</span>
+            <span onclick="sendEmoji('❤️')">❤️</span>
+            <span onclick="sendEmoji('👍')">👍</span>
+            <span onclick="sendEmoji('🎮')">🎮</span>
+            <span onclick="sendEmoji('✨')">✨</span>
+        </div>
 
         <div id="input-area">
             <button class="btn-action" onclick="document.getElementById('file-input').click()">📁</button>
@@ -211,8 +259,8 @@
             
             <button id="mic-btn" class="btn-action btn-mic" onclick="toggleRecording()">🎤</button>
 
-            <input type="text" id="msg-input" placeholder="اكتب 'صورة جون سينا' أو 'فيديو سيارة'..." onkeypress="handleKeyPress(event)" />
-            <button class="btn-action" onclick="sendTextMessage()">➤</button>
+            <input type="text" id="msg-input" placeholder="اكتب رسالتك أو 'صورة كلب'..." onkeypress="handleKeyPress(event)" />
+            <button class="btn-send" onclick="sendTextMessage()">➤</button>
         </div>
     </div>
 
@@ -225,34 +273,43 @@
         let audioChunks = [];
         let isRecording = false;
 
-        function joinRoom() {
-            const uInput = document.getElementById('username-input').value.trim();
-            const rInput = document.getElementById('room-input').value.trim();
-
-            if (!uInput || !rInput) {
-                alert("يرجى كتابة الاسم واسم الغرفة أولاً!");
-                return;
-            }
-
-            username = uInput;
-            currentRoom = "room_" + rInput.toLowerCase();
-
+        function initPubNub() {
             pubnub = new PubNub({
                 publishKey: "demo",
                 subscribeKey: "demo",
                 userId: username + "_" + Math.floor(Math.random() * 1000)
             });
 
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('chat-screen').style.display = 'flex';
-            document.getElementById('room-display').innerText = "الغرفة: " + rInput;
-            document.getElementById('user-display').innerText = "الاسم: " + username;
-
             pubnub.addListener({
                 message: function(m) {
                     displayMessage(m.message);
                 }
             });
+        }
+
+        function joinGlobalRoom() {
+            const uInput = document.getElementById('username-input').value.trim();
+            if (!uInput) { alert("يرجى كتابة الاسم أولاً!"); return; }
+            username = uInput;
+            currentRoom = "global_chat_room_2026";
+            startChat("الدردشة العالمية 🌍");
+        }
+
+        function joinPrivateRoom() {
+            const uInput = document.getElementById('username-input').value.trim();
+            const rInput = document.getElementById('room-input').value.trim();
+            if (!uInput || !rInput) { alert("يرجى كتابة الاسم واسم الغرفة!"); return; }
+            username = uInput;
+            currentRoom = "room_" + rInput.toLowerCase();
+            startChat("غرفة: " + rInput);
+        }
+
+        function startChat(roomTitle) {
+            initPubNub();
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
+            document.getElementById('room-display').innerText = roomTitle;
+            document.getElementById('user-display').innerText = "المستخدم: " + username;
 
             pubnub.subscribe({ channels: [currentRoom] });
         }
@@ -270,59 +327,35 @@
             });
 
             input.value = "";
-
             const rawText = text.toLowerCase().trim();
 
-            // 1. توليد صورة مع تحسين الفهم
+            // 1. توليد الصور بالذكاء الاصطناعي
             if (rawText.includes("صورة") || rawText.includes("صوره") || rawText.includes("ارسم")) {
                 let prompt = text.replace(/^(ذكاء|ai)\s+/i, "");
                 prompt = prompt.replace(/(صورة|صوره|ارسم|لـ|عن)/gi, "").trim();
 
                 pubnub.publish({
                     channel: currentRoom,
-                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "🎨 جاري رسم الصورة لك...", time: timeStr }
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "🎨 جاري رسم الصورة...", time: timeStr }
                 });
 
-                // ترجمة أو تحسين النص عبر POLLINATIONS للإنجليزية لتوليد صورة دقيقة
-                try {
-                    const transRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent("Translate to concise English image prompt: " + prompt)}`);
-                    let englishPrompt = await transRes.text();
-                    englishPrompt = englishPrompt.replace(/[^a-zA-Z0-9 ]/g, " ").trim();
+                // قاموس سريع للكلمات الشهيرة لضمان الدقة العالية
+                let translatedPrompt = prompt;
+                if (prompt.includes("جون سينا")) translatedPrompt = "John Cena";
+                else if (prompt.includes("سيارة")) translatedPrompt = "sports car";
+                else if (prompt.includes("كلب")) translatedPrompt = "cute dog";
+                else if (prompt.includes("قطة") || prompt.includes("قط")) translatedPrompt = "cute cat";
 
-                    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(englishPrompt || prompt)}?width=512&height=512&seed=${Math.floor(Math.random()*1000)}&nologo=true`;
-
-                    pubnub.publish({
-                        channel: currentRoom,
-                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'image', content: imageUrl, time: timeStr }
-                    });
-                } catch (e) {
-                    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
-                    pubnub.publish({
-                        channel: currentRoom,
-                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'image', content: imageUrl, time: timeStr }
-                    });
-                }
-                return;
-            }
-
-            // 2. البحث عن فيديو
-            if (rawText.includes("فيديو") || rawText.includes("فديو")) {
-                let query = text.replace(/^(ذكاء|ai)\s+/i, "");
-                query = query.replace(/(فيديو|فديو|لـ|عن)/gi, "").trim();
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(translatedPrompt)}?width=512&height=512&seed=${Math.floor(Math.random()*9999)}&nologo=true`;
 
                 pubnub.publish({
                     channel: currentRoom,
-                    message: { 
-                        sender: "🤖 الذكاء الاصطناعي", 
-                        type: 'ai', 
-                        content: `🎬 فيديوهات عن (${query || text}): <br><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query || text)}" target="_blank" style="color: yellow; font-weight: bold;">اضغط هنا لمشاهدة الفيديوهات</a>`, 
-                        time: timeStr 
-                    }
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'image', content: imageUrl, time: timeStr }
                 });
                 return;
             }
 
-            // 3. المحادثة النصية العادية
+            // 2. المحادثة النصية الذكية
             if (rawText.startsWith("ذكاء") || rawText.startsWith("ai")) {
                 const cleanQuery = text.replace(/^(ذكاء|ai)\s+/i, "").trim();
 
@@ -337,15 +370,19 @@
 
                     pubnub.publish({
                         channel: currentRoom,
-                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: aiAnswer || "عذراً لم أستطع الإجابة.", time: timeStr }
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: aiAnswer || "عذراً، لم أستطع الفهم.", time: timeStr }
                     });
                 } catch (err) {
                     pubnub.publish({
                         channel: currentRoom,
-                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.", time: timeStr }
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: "خطأ في الاتصال بالذكاء الاصطناعي.", time: timeStr }
                     });
                 }
             }
+        }
+
+        function sendEmoji(emoji) {
+            document.getElementById('msg-input').value += emoji;
         }
 
         function uploadFromGallery(input) {
@@ -353,8 +390,8 @@
             if (!file) return;
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
             const reader = new FileReader();
+
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
@@ -382,7 +419,6 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-
             input.value = "";
         }
 
@@ -412,7 +448,7 @@
                     isRecording = true;
                     micBtn.classList.add('recording');
                 } catch (err) {
-                    alert("يرجى إعطاء الصلاحية لاستخدام الميكروفون.");
+                    alert("يرجى سماح الميكروفون لاستخدامه.");
                 }
             } else {
                 mediaRecorder.stop();
@@ -447,10 +483,6 @@
             msgEl.innerHTML = contentHTML;
             messagesDiv.appendChild(msgEl);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-theme');
         }
 
         function handleKeyPress(e) {
