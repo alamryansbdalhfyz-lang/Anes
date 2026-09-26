@@ -127,7 +127,7 @@
 
         .message.my-msg { background-color: var(--my-msg-bg); align-self: flex-start; }
         .message.other-msg { background-color: var(--other-msg-bg); align-self: flex-end; }
-        .message.ai-msg { background-color: #0288d1; color: white; align-self: center; width: 90%; text-align: center; }
+        .message.ai-msg { background-color: #0288d1; color: white; align-self: center; width: 90%; text-align: right; }
 
         .message .sender { font-size: 11px; font-weight: bold; color: #075e54; margin-bottom: 4px; display: block; }
         .dark-theme .message .sender { color: #25d366; }
@@ -283,7 +283,7 @@
                 });
 
                 try {
-                    const res = await fetch(`https://api.pollinations.ai/prompt/${encodeURIComponent(promptQuery)}?model=openai`);
+                    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptQuery)}`);
                     const aiAnswer = await res.text();
 
                     pubnub.publish({
@@ -310,27 +310,29 @@
                 message: { sender: username, type: 'text', content: "⏳ جاري رفع الصورة من المعرض...", time: timeStr }
             });
 
-            const apiKey = 'd822557e93bd0db4ca7dc621184fb24e';
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('key', '6d207e02198a847aa98d0a2a901485a5');
+            formData.append('action', 'upload');
+            formData.append('source', file);
+            formData.append('format', 'json');
 
             try {
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                const res = await fetch('https://freeimage.host/api/1/upload', {
                     method: 'POST',
                     body: formData
                 });
                 const data = await res.json();
 
-                if (data && data.success) {
+                if (data && data.image && data.image.url) {
                     pubnub.publish({
                         channel: currentRoom,
-                        message: { sender: username, type: 'image', content: data.data.url, time: timeStr }
+                        message: { sender: username, type: 'image', content: data.image.url, time: timeStr }
                     });
                 } else {
-                    alert("فشل رفع الصورة.");
+                    alert("تعذر رفع الصورة، اختر صورة أخرى.");
                 }
             } catch (err) {
-                alert("حدث خطأ أثناء رفع الملف.");
+                alert("حدث خطأ أثناء الاتصال بسيرفر الرفع.");
             }
             
             input.value = "";
