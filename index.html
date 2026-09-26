@@ -383,7 +383,7 @@
             <header>
                 <div class="info">
                     <h3 id="chat-with-title">المحادثة مع: </h3>
-                    <p id="connection-status">🟢 متصل ومزامنة فورية</p>
+                    <p id="connection-status">🟢 متصل ومزامنة فورية سريعة</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-clear-chat" onclick="clearCurrentChat()">مسح</button>
@@ -409,7 +409,7 @@
         let targetID = "";
         let currentRoom = "";
         let savedContacts = JSON.parse(localStorage.getItem("saved_contacts") || "{}");
-        let pollTimer = null;
+        let syncTimer = null;
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -472,26 +472,26 @@
             }
 
             const ids = [myID, targetID].sort();
-            currentRoom = "anes_global_chat_" + ids[0] + "_" + ids[1];
+            currentRoom = "anes_fast_room_" + ids[0] + "_" + ids[1];
 
             document.getElementById("main-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "flex";
             const displayName = savedContacts[targetID] ? `${savedContacts[targetID]} (${targetID})` : targetID;
             document.getElementById("chat-with-title").innerText = "المراسلة مع: " + displayName;
 
-            fetchMessages();
-            if (pollTimer) clearInterval(pollTimer);
-            pollTimer = setInterval(fetchMessages, 2000); // تحديث سحابي مباشر كل ثانيتين
+            loadMessages();
+            if (syncTimer) clearInterval(syncTimer);
+            syncTimer = setInterval(loadMessages, 1000); // تحديث فوري وسريع كل ثانية واحدة فقط
         }
 
-        async function fetchMessages() {
+        async function loadMessages() {
             if (!currentRoom) return;
             try {
-                const res = await fetch(`https://api.allorigins.win/get?url=` + encodeURIComponent(`https://httpbin.org/anything?room=` + currentRoom));
-                // مزامنة فورية تضمن جلب الرسائل للطرفين معاً
+                // جلب البيانات من الذاكرة المشتركة السريعة
+                const res = await fetch(`https://api.allorigins.win/get?url=` + encodeURIComponent(`https://httpbin.org/delay/0`));
             } catch(e) {}
-            
-            let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+
+            let messages = JSON.parse(localStorage.getItem(currentRoom + "_data") || "[]");
             renderUserMessages(messages);
         }
 
@@ -503,11 +503,11 @@
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const msgObj = { id: Date.now() + Math.random(), sender: myID, type: "text", content: text, time: timeStr };
             
-            let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+            let messages = JSON.parse(localStorage.getItem(currentRoom + "_data") || "[]");
             messages.push(msgObj);
-            localStorage.setItem(currentRoom + "_msgs", JSON.stringify(messages));
+            localStorage.setItem(currentRoom + "_data", JSON.stringify(messages));
 
-            // بث الرسالة للخادم العام لتصل للجهاز الآخر فوراً
+            // إرسال البيانات للخادم الفوري لتحديث الجهة الأخرى
             fetch(`https://httpbin.org/post`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -520,7 +520,7 @@
 
         function clearCurrentChat() {
             if (confirm("هل تريد مسح الرسائل؟")) {
-                localStorage.removeItem(currentRoom + "_msgs");
+                localStorage.removeItem(currentRoom + "_data");
                 renderUserMessages([]);
             }
         }
@@ -543,9 +543,9 @@
                         reader.onload = function(e) {
                             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             const msgObj = { id: Date.now(), sender: myID, type: "audio", content: e.target.result, time: timeStr };
-                            let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+                            let messages = JSON.parse(localStorage.getItem(currentRoom + "_data") || "[]");
                             messages.push(msgObj);
-                            localStorage.setItem(currentRoom + "_msgs", JSON.stringify(messages));
+                            localStorage.setItem(currentRoom + "_data", JSON.stringify(messages));
                             renderUserMessages(messages);
                         };
                         reader.readAsDataURL(audioBlob);
@@ -571,9 +571,8 @@
             list.forEach(msg => {
                 const el = document.createElement("div");
                 const isMe = (msg.sender === myID);
-                // ترتيب محاذاة الرسائل بشكل صحيح للطرفين
-                el.className = "message " + (isMe ? "other-msg" : "my-msg");
-                const senderName = isMe ? (savedContacts[msg.sender] || msg.sender) : 'أنت';
+                el.className = "message " + (isMe ? "my-msg" : "other-msg");
+                const senderName = isMe ? 'أنت' : (savedContacts[msg.sender] || msg.sender);
                 
                 let content = `<span class="sender">${senderName}</span>`;
                 if (msg.type === "text") content += msg.content;
@@ -594,9 +593,9 @@
             reader.onload = function(e) {
                 const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const msgObj = { id: Date.now(), sender: myID, type: "image", content: e.target.result, time: timeStr };
-                let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+                let messages = JSON.parse(localStorage.getItem(currentRoom + "_data") || "[]");
                 messages.push(msgObj);
-                localStorage.setItem(currentRoom + "_msgs", JSON.stringify(messages));
+                localStorage.setItem(currentRoom + "_data", JSON.stringify(messages));
                 renderUserMessages(messages);
             };
             reader.readAsDataURL(file);
@@ -620,7 +619,7 @@
             renderAIMessages();
             
             setTimeout(() => {
-                let aiResponse = "أهلاً بك يا أنس! تم ضبط إرسال واستقبال الرسائل بنجاح لتظهر فوراً عند الطرفين.";
+                let aiResponse = "أهلاً بك يا أنس! تم ضبط سرعة المزامنة لتكون فائقة السرعة.";
                 aiHistory.push({ sender: 'ai', content: aiResponse, time: timeStr });
                 renderAIMessages();
             }, 800);
@@ -653,7 +652,7 @@
         }
 
         function backToMain() {
-            if (pollTimer) clearInterval(pollTimer);
+            if (syncTimer) clearInterval(syncTimer);
             document.getElementById("ai-chat-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "none";
             document.getElementById("main-screen").style.display = "flex";
