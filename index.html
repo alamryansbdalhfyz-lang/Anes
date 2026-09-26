@@ -184,7 +184,6 @@
 </head>
 <body>
 
-    <!-- شاشة تسجيل الدخول -->
     <div id="login-screen">
         <h2>شات الذكاء الاصطناعي والميديا</h2>
         <input type="text" id="username-input" placeholder="اسمك..." />
@@ -192,7 +191,6 @@
         <button onclick="joinRoom()">دخول المحادثة</button>
     </div>
 
-    <!-- شاشة المحادثة -->
     <div id="chat-screen" style="display: none;">
         <header>
             <div class="info">
@@ -213,7 +211,7 @@
             
             <button id="mic-btn" class="btn-action btn-mic" onclick="toggleRecording()">🎤</button>
 
-            <input type="text" id="msg-input" placeholder="اكتب رسالة (أو 'صورة سيارة' أو 'فيديو قطة')..." onkeypress="handleKeyPress(event)" />
+            <input type="text" id="msg-input" placeholder="اكتب 'صورة كلب' أو 'فيديو سيارة'..." onkeypress="handleKeyPress(event)" />
             <button class="btn-action" onclick="sendTextMessage()">➤</button>
         </div>
     </div>
@@ -266,6 +264,7 @@
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+            // إرسال الرسالة الأصلية التي كتبها المستخدم
             pubnub.publish({
                 channel: currentRoom,
                 message: { sender: username, type: 'text', content: text, time: timeStr }
@@ -273,18 +272,21 @@
 
             input.value = "";
 
-            const lowerText = text.toLowerCase();
+            const rawText = text.toLowerCase().trim();
 
-            // 1. طلب إنشاء صورة بواسطة الذكاء الاصطناعي
-            if (lowerText.startsWith("صورة ") || lowerText.startsWith("ارسم ") || lowerText.startsWith("صوره ")) {
-                const promptQuery = text.replace(/^(صورة|ارسم|صوره)\s+/i, "");
+            // 1. طلب توليد صورة (سواء كتب "صورة كلب" أو "ارسم كلب" أو "ذكاء صورة كلب")
+            if (rawText.includes("صورة") || rawText.includes("صوره") || rawText.includes("ارسم")) {
+                let prompt = text.replace(/^(ذكاء|ai)\s+/i, "");
+                prompt = prompt.replace(/(صورة|صوره|ارسم|لـ|عن)/gi, "").trim();
                 
+                if (!prompt) prompt = "beautiful art";
+
                 pubnub.publish({
                     channel: currentRoom,
-                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "🎨 جاري رسم ورسم الصورة لك...", time: timeStr }
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "🎨 جاري رسم الصورة لك...", time: timeStr }
                 });
 
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptQuery)}?width=512&height=512&nologo=true`;
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
 
                 pubnub.publish({
                     channel: currentRoom,
@@ -294,32 +296,33 @@
             }
 
             // 2. طلب البحث عن فيديو
-            if (lowerText.startsWith("فيديو ") || lowerText.startsWith("فيديو لـ")) {
-                const query = text.replace(/^(فيديو|فيديو لـ)\s+/i, "");
+            if (rawText.includes("فيديو") || rawText.includes("فديو")) {
+                let query = text.replace(/^(ذكاء|ai)\s+/i, "");
+                query = query.replace(/(فيديو|فديو|لـ|عن)/gi, "").trim();
 
                 pubnub.publish({
                     channel: currentRoom,
                     message: { 
                         sender: "🤖 الذكاء الاصطناعي", 
                         type: 'ai', 
-                        content: `🎬 يمكنك مشاهدة فيديوهات عن (${query}) مباشرة عبر يوتيوب: <br><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query)}" target="_blank" style="color: yellow; font-weight: bold;">اضغط هنا لمشاهدة الفيديوهات</a>`, 
+                        content: `🎬 فيديوهات عن (${query || text}): <br><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query || text)}" target="_blank" style="color: yellow; font-weight: bold;">اضغط هنا لمشاهدة الفيديوهات</a>`, 
                         time: timeStr 
                     }
                 });
                 return;
             }
 
-            // 3. المحادثة النصية العادية مع الذكاء الاصطناعي
-            if (lowerText.startsWith("ذكاء ") || lowerText.startsWith("ai ")) {
-                const promptQuery = text.replace(/^(ذكاء|ai)\s+/i, "");
-                
+            // 3. المحادثة النصية (عند البدء بكلمة "ذكاء")
+            if (rawText.startsWith("ذكاء") || rawText.startsWith("ai")) {
+                const cleanQuery = text.replace(/^(ذكاء|ai)\s+/i, "").trim();
+
                 pubnub.publish({
                     channel: currentRoom,
                     message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "جاري التفكير...", time: timeStr }
                 });
 
                 try {
-                    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptQuery)}`);
+                    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(cleanQuery)}`);
                     const aiAnswer = await res.text();
 
                     pubnub.publish({
