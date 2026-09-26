@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المحادثة والميديا</title>
+    <title>تطبيق المحادثة والذكاء الاصطناعي</title>
     <style>
         * {
             box-sizing: border-box;
@@ -84,7 +84,7 @@
             gap: 10px;
         }
         .message {
-            max-width: 80%;
+            max-width: 85%;
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 14px;
@@ -93,7 +93,7 @@
         }
         .message.my-msg { background-color: #dcf8c6; align-self: flex-start; }
         .message.other-msg { background-color: #ffffff; align-self: flex-end; }
-        .message.ai-msg { background-color: #e3f2fd; align-self: center; border: 1px solid #90caf9; }
+        .message.ai-msg { background-color: #e3f2fd; align-self: center; border: 1px solid #90caf9; width: 90%; }
         .message .sender { font-size: 11px; font-weight: bold; color: #075e54; margin-bottom: 4px; display: block; }
         .message.ai-msg .sender { color: #1565c0; }
         .message img, .message video {
@@ -150,7 +150,7 @@
         <div id="messages"></div>
         <div id="input-area">
             <button class="btn-action" onclick="document.getElementById('file-input').click()">📁 المعرض</button>
-            <input type="file" id="file-input" accept="image/*,video/*" onchange="uploadFromGallery(this)" />
+            <input type="file" id="file-input" accept="image/*" onchange="uploadFromGallery(this)" />
             
             <input type="text" id="msg-input" placeholder="اكتب رسالة (أو 'ذكاء' لـ AI)..." onkeypress="handleKeyPress(event)" />
             <button class="btn-action" onclick="sendTextMessage()">➤</button>
@@ -213,22 +213,22 @@
                 
                 pubnub.publish({
                     channel: currentRoom,
-                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "جاري التفكير..." }
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "جاري التفكير والأجابة..." }
                 });
 
                 try {
-                    const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(promptQuery)}&format=json&no_html=1&skip_disambig=1`);
-                    const data = await response.json();
-                    let aiAnswer = data.AbstractText || "عذراً، لم أستطع العثور على إجابة دقيقة لهذا السؤال حالياً.";
+                    // استخدام محرك الذكاء الاصطناعي الذكي
+                    const res = await fetch(`https://api.pollinations.ai/prompt/${encodeURIComponent(promptQuery)}?model=openai`);
+                    const aiAnswer = await res.text();
 
                     pubnub.publish({
                         channel: currentRoom,
-                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: aiAnswer }
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: aiAnswer || "عذراً لم أستطع الإجابة." }
                     });
                 } catch (err) {
                     pubnub.publish({
                         channel: currentRoom,
-                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: "حدث خطأ أثناء التواصل مع سيرفر الذكاء الاصطناعي." }
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'ai', content: "حدث خطأ أثناء التواصل مع الذكاء الاصطناعي." }
                     });
                 }
             }
@@ -240,10 +240,10 @@
 
             pubnub.publish({
                 channel: currentRoom,
-                message: { sender: username, type: 'text', content: "⏳ جاري رفع الملف..." }
+                message: { sender: username, type: 'text', content: "⏳ جاري رفع الصورة من المعرض..." }
             });
 
-            const apiKey = 'd822557e93bd0db4ca7dc621184fb24e'; // مفتاح الخدمة المجاني
+            const apiKey = 'd822557e93bd0db4ca7dc621184fb24e';
             const formData = new FormData();
             formData.append('image', file);
 
@@ -254,7 +254,7 @@
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if (data && data.success) {
                     pubnub.publish({
                         channel: currentRoom,
                         message: { 
@@ -264,10 +264,10 @@
                         }
                     });
                 } else {
-                    alert("عذراً، تعذر رفع الملف. اختر صورة أخرى.");
+                    alert("فشل الرفع، يرجى اختيار صورة بحجم أصغر.");
                 }
             } catch (err) {
-                alert("حدث خطأ أثناء الاتصال بالخادم.");
+                alert("حدث خطأ أثناء الاتصال بسيرفر الرفع.");
             }
             
             input.value = "";
@@ -290,8 +290,6 @@
                 contentHTML += msg.content;
             } else if (msg.type === 'image') {
                 contentHTML += `<img src="${msg.content}" alt="صورة" />`;
-            } else if (msg.type === 'video') {
-                contentHTML += `<video src="${msg.content}" controls></video>`;
             }
 
             msgEl.innerHTML = contentHTML;
