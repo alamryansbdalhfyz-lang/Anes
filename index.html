@@ -211,7 +211,7 @@
             
             <button id="mic-btn" class="btn-action btn-mic" onclick="toggleRecording()">🎤</button>
 
-            <input type="text" id="msg-input" placeholder="اكتب 'صورة كلب' أو 'فيديو سيارة'..." onkeypress="handleKeyPress(event)" />
+            <input type="text" id="msg-input" placeholder="اكتب 'صورة جون سينا' أو 'فيديو سيارة'..." onkeypress="handleKeyPress(event)" />
             <button class="btn-action" onclick="sendTextMessage()">➤</button>
         </div>
     </div>
@@ -264,7 +264,6 @@
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            // إرسال الرسالة الأصلية التي كتبها المستخدم
             pubnub.publish({
                 channel: currentRoom,
                 message: { sender: username, type: 'text', content: text, time: timeStr }
@@ -274,28 +273,39 @@
 
             const rawText = text.toLowerCase().trim();
 
-            // 1. طلب توليد صورة (سواء كتب "صورة كلب" أو "ارسم كلب" أو "ذكاء صورة كلب")
+            // 1. توليد صورة مع تحسين الفهم
             if (rawText.includes("صورة") || rawText.includes("صوره") || rawText.includes("ارسم")) {
                 let prompt = text.replace(/^(ذكاء|ai)\s+/i, "");
                 prompt = prompt.replace(/(صورة|صوره|ارسم|لـ|عن)/gi, "").trim();
-                
-                if (!prompt) prompt = "beautiful art";
 
                 pubnub.publish({
                     channel: currentRoom,
                     message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "🎨 جاري رسم الصورة لك...", time: timeStr }
                 });
 
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
+                // ترجمة أو تحسين النص عبر POLLINATIONS للإنجليزية لتوليد صورة دقيقة
+                try {
+                    const transRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent("Translate to concise English image prompt: " + prompt)}`);
+                    let englishPrompt = await transRes.text();
+                    englishPrompt = englishPrompt.replace(/[^a-zA-Z0-9 ]/g, " ").trim();
 
-                pubnub.publish({
-                    channel: currentRoom,
-                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'image', content: imageUrl, time: timeStr }
-                });
+                    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(englishPrompt || prompt)}?width=512&height=512&seed=${Math.floor(Math.random()*1000)}&nologo=true`;
+
+                    pubnub.publish({
+                        channel: currentRoom,
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'image', content: imageUrl, time: timeStr }
+                    });
+                } catch (e) {
+                    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
+                    pubnub.publish({
+                        channel: currentRoom,
+                        message: { sender: "🤖 الذكاء الاصطناعي", type: 'image', content: imageUrl, time: timeStr }
+                    });
+                }
                 return;
             }
 
-            // 2. طلب البحث عن فيديو
+            // 2. البحث عن فيديو
             if (rawText.includes("فيديو") || rawText.includes("فديو")) {
                 let query = text.replace(/^(ذكاء|ai)\s+/i, "");
                 query = query.replace(/(فيديو|فديو|لـ|عن)/gi, "").trim();
@@ -312,7 +322,7 @@
                 return;
             }
 
-            // 3. المحادثة النصية (عند البدء بكلمة "ذكاء")
+            // 3. المحادثة النصية العادية
             if (rawText.startsWith("ذكاء") || rawText.startsWith("ai")) {
                 const cleanQuery = text.replace(/^(ذكاء|ai)\s+/i, "").trim();
 
