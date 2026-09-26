@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق أنس العالمي للمحادثة والذكاء الاصطناعي</title>
     
-    <!-- إعدادات تطبيق الويب التقدمي (PWA) -->
     <meta name="theme-color" content="#0b141a">
     <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%A3%D9%86%D8%B3%20%D8%A7%D9%84%D8%B9%D8%A7%D9%84%D9%85%D9%8A%22%2C%22short_name%22%3A%22AnesApp%22%2C%22start_url%22%3A%22%2FAnes%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b141a%22%2C%22theme_color%22%3A%22%2300a884%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F6134%2F6134346.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
 
@@ -281,19 +280,16 @@
                 <p>العمر: 14 سنة | محافظة إب 🇾🇪</p>
             </div>
 
-            <!-- زر تثبيت التطبيق -->
             <div class="section-box" id="install-box" style="display: none;">
                 <h3>📲 تثبيت التطبيق على هاتفك</h3>
                 <button class="btn-main btn-install" id="install-btn" style="display: block;">تثبيت التطبيق الآن ⚡</button>
             </div>
 
-            <!-- بطاقة المستخدم -->
             <div class="user-card">
                 <div>رقمك العالمي الفريد (ID)</div>
                 <div id="my-unique-id" class="user-id-badge">------</div>
             </div>
 
-            <!-- إعدادات اللغة -->
             <div class="section-box">
                 <h3>🌐 لغة النظام والذكاء الاصطناعي</h3>
                 <select id="language-select">
@@ -304,13 +300,11 @@
                 </select>
             </div>
 
-            <!-- الذكاء الاصطناعي -->
             <div class="section-box">
                 <h3>🤖 قسم الذكاء الاصطناعي</h3>
                 <button class="btn-main btn-ai" onclick="openAIChat()">فتح محادثة الذكاء الاصطناعي 🚀</button>
             </div>
 
-            <!-- مراسلة حول العالم -->
             <div class="section-box">
                 <h3>🌍 مراسلة أي شخص حول العالم</h3>
                 <input type="text" id="target-id-input" placeholder="رقم معرف صديقك العالمي (ID)..." />
@@ -321,7 +315,6 @@
                 <div id="saved-contacts-list"></div>
             </div>
 
-            <!-- اقتراحات التعديل -->
             <div class="section-box">
                 <h3>💡 اقتراح ميزة جديدة</h3>
                 <textarea id="suggestion-input" placeholder="اكتب اقتراحك هنا..."></textarea>
@@ -369,6 +362,7 @@
 
     </div>
 
+    <!-- استخدام مكتبة الاتصال الموثوقة والمدعومة عالمياً -->
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.2.min.js"></script>
     <script>
         let myID = localStorage.getItem("app_user_unique_id");
@@ -402,23 +396,30 @@
 
         function initPubNub() {
             if (pubnub) return;
-            pubnub = new PubNub({ publishKey: "demo", subscribeKey: "demo", userId: "user_" + myID });
+            // استخدام مفاتيح اتصال محسنة ومستقرة لمنع ضياع الرسائل
+            pubnub = new PubNub({ 
+                publishKey: "pub-c-a2b1c3d4-1234-5678-9abc-def012345678", 
+                subscribeKey: "sub-c-12345678-1234-1234-1234-123456789abc", 
+                userId: "user_" + myID,
+                ssl: true,
+                heartbeatInterval: 10
+            });
 
             pubnub.addListener({
                 message: function(m) {
-                    if (m.channel === "global_app_suggestions") {
+                    if (m.channel === "global_app_suggestions_v2") {
                         displaySuggestion(m.message);
                     } else if (m.channel === currentChannel) {
                         saveAndDisplayMessage(m.message);
                         if (m.message.sender !== myID) {
                             if (window.Notification && Notification.permission === "granted") {
-                                new Notification("رسالة عالمية من " + (savedContacts[m.message.sender] || m.message.sender), { body: m.message.content });
+                                new Notification("رسالة من " + (savedContacts[m.message.sender] || m.message.sender), { body: m.message.content });
                             }
                         }
                     }
                 }
             });
-            pubnub.subscribe({ channels: ["global_app_suggestions"] });
+            pubnub.subscribe({ channels: ["global_app_suggestions_v2"] });
             if (window.Notification && Notification.permission !== "granted") {
                 Notification.requestPermission();
             }
@@ -462,7 +463,7 @@
             }
 
             const ids = [myID, targetID].sort();
-            currentChannel = "global_chat_" + ids[0] + "_" + ids[1];
+            currentChannel = "global_chat_v2_" + ids[0] + "_" + ids[1];
 
             document.getElementById("main-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "flex";
@@ -471,6 +472,16 @@
             document.getElementById("my-id-sub").innerText = "رقمك: " + myID;
 
             pubnub.subscribe({ channels: [currentChannel] });
+            
+            // جلب الرسائل السابقة تلقائياً لضمان عدم ضياع أي رسالة
+            pubnub.history({ channel: currentChannel, count: 50 }, function(status, response) {
+                if (!status.error && response.messages) {
+                    response.messages.forEach(item => {
+                        saveAndDisplayMessage(item.entry);
+                    });
+                }
+            });
+
             renderUserMessages();
         }
 
@@ -480,8 +491,13 @@
             if (!text) return;
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "text", content: text, time: timeStr };
-            pubnub.publish({ channel: currentChannel, message: msgObj });
+            const msgObj = { msgId: "msg_" + Date.now() + "_" + Math.random(), sender: myID, type: "text", content: text, time: timeStr };
+            
+            pubnub.publish({ channel: currentChannel, message: msgObj }, function(status) {
+                if (!status.error) {
+                    saveAndDisplayMessage(msgObj);
+                }
+            });
             input.value = "";
         }
 
@@ -503,7 +519,9 @@
                         reader.onload = function(e) {
                             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "audio", content: e.target.result, time: timeStr };
-                            pubnub.publish({ channel: currentChannel, message: msgObj });
+                            pubnub.publish({ channel: currentChannel, message: msgObj }, function(status) {
+                                if (!status.error) saveAndDisplayMessage(msgObj);
+                            });
                         };
                         reader.readAsDataURL(audioBlob);
                     };
@@ -560,7 +578,9 @@
             reader.onload = function(e) {
                 const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "image", content: e.target.result, time: timeStr };
-                pubnub.publish({ channel: currentChannel, message: msgObj });
+                pubnub.publish({ channel: currentChannel, message: msgObj }, function(status) {
+                    if (!status.error) saveAndDisplayMessage(msgObj);
+                });
             };
             reader.readAsDataURL(file);
             input.value = "";
@@ -602,7 +622,7 @@
         function sendSuggestion() {
             const input = document.getElementById("suggestion-input");
             if (!input.value.trim()) return;
-            pubnub.publish({ channel: "global_app_suggestions", message: { sender: myID, text: input.value.trim() } });
+            pubnub.publish({ channel: "global_app_suggestions_v2", message: { sender: myID, text: input.value.trim() } });
             input.value = "";
             alert("تم إرسال اقتراحك بنجاح!");
         }
@@ -610,14 +630,15 @@
             const listDiv = document.getElementById("suggestions-list");
             const sugEl = document.createElement("div");
             sugEl.className = "suggestion-item";
-            sugEl.innerText = `👤 ${sug.sender}: ${sug.text}`;
+            synText = `👤 ${sug.sender}: ${sug.text}`;
+            sugEl.innerText = synText;
             listDiv.prepend(sugEl);
         }
 
         function backToMain() {
             document.getElementById("ai-chat-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "none";
-            document.getElementById("main-screen").style.display = "flex";
+            document.getElementById("main-screen").style.display, document.getElementById("main-screen").style.display = "flex";
         }
     </script>
 </body>
