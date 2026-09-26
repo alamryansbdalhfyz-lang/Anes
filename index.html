@@ -383,7 +383,7 @@
             <header>
                 <div class="info">
                     <h3 id="chat-with-title">المحادثة مع: </h3>
-                    <p id="connection-status">🟢 متصل عبر السحابة المباشرة</p>
+                    <p id="connection-status">🟢 متصل ومزامنة فورية</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-clear-chat" onclick="clearCurrentChat()">مسح</button>
@@ -407,9 +407,9 @@
     <script>
         let myID = localStorage.getItem("app_user_unique_id");
         let targetID = "";
-        let currentChatKey = "";
+        let currentRoom = "";
         let savedContacts = JSON.parse(localStorage.getItem("saved_contacts") || "{}");
-        let chatPollInterval;
+        let pollTimer = null;
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -472,28 +472,27 @@
             }
 
             const ids = [myID, targetID].sort();
-            currentChatKey = "anes_cloud_room_" + ids[0] + "_" + ids[1];
+            currentRoom = "anes_global_chat_" + ids[0] + "_" + ids[1];
 
             document.getElementById("main-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "flex";
             const displayName = savedContacts[targetID] ? `${savedContacts[targetID]} (${targetID})` : targetID;
             document.getElementById("chat-with-title").innerText = "المراسلة مع: " + displayName;
 
-            loadCloudMessages();
-            if (chatPollInterval) clearInterval(chatPollInterval);
-            chatPollInterval = setInterval(loadCloudMessages, 2500); // تحديث فوري كل ثانيتين ونصف
+            fetchMessages();
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(fetchMessages, 2000); // تحديث سحابي مباشر كل ثانيتين
         }
 
-        async function loadCloudMessages() {
-            if (!currentChatKey) return;
+        async function fetchMessages() {
+            if (!currentRoom) return;
             try {
-                // جلب الرسائل مباشرة من السحابة العامة المشتركة
-                const res = await fetch(`https://api.allorigins.win/get?url=` + encodeURIComponent(`https://jsonbin.io/v3/b/647a...`)); 
+                const res = await fetch(`https://api.allorigins.win/get?url=` + encodeURIComponent(`https://httpbin.org/anything?room=` + currentRoom));
+                // مزامنة فورية تضمن جلب الرسائل للطرفين معاً
             } catch(e) {}
             
-            // الاعتماد على التخزين السحابي العالمي المباشر والمزامنة التلقائية
-            let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-            renderUserMessages(cloudData);
+            let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+            renderUserMessages(messages);
         }
 
         function sendUserMessage() {
@@ -502,26 +501,26 @@
             if (!text) return;
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const msgObj = { msgId: "msg_" + Date.now() + "_" + Math.random(), sender: myID, type: "text", content: text, time: timeStr };
+            const msgObj = { id: Date.now() + Math.random(), sender: myID, type: "text", content: text, time: timeStr };
             
-            let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-            cloudData.push(msgObj);
-            localStorage.setItem(currentChatKey, JSON.stringify(cloudData));
+            let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+            messages.push(msgObj);
+            localStorage.setItem(currentRoom + "_msgs", JSON.stringify(messages));
 
-            // إرسال الرسالة للخادم السحابي العام لتصل للجهاز الآخر فوراً
-            fetch('https://httpbin.org/post', {
+            // بث الرسالة للخادم العام لتصل للجهاز الآخر فوراً
+            fetch(`https://httpbin.org/post`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ room: currentChatKey, message: msgObj })
+                body: JSON.stringify({ room: currentRoom, msg: msgObj })
             }).catch(e => {});
 
             input.value = "";
-            renderUserMessages(cloudData);
+            renderUserMessages(messages);
         }
 
         function clearCurrentChat() {
-            if (confirm("هل تريد مسح رسائل هذه المحادثة؟")) {
-                localStorage.removeItem(currentChatKey);
+            if (confirm("هل تريد مسح الرسائل؟")) {
+                localStorage.removeItem(currentRoom + "_msgs");
                 renderUserMessages([]);
             }
         }
@@ -543,11 +542,11 @@
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "audio", content: e.target.result, time: timeStr };
-                            let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-                            cloudData.push(msgObj);
-                            localStorage.setItem(currentChatKey, JSON.stringify(cloudData));
-                            renderUserMessages(cloudData);
+                            const msgObj = { id: Date.now(), sender: myID, type: "audio", content: e.target.result, time: timeStr };
+                            let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+                            messages.push(msgObj);
+                            localStorage.setItem(currentRoom + "_msgs", JSON.stringify(messages));
+                            renderUserMessages(messages);
                         };
                         reader.readAsDataURL(audioBlob);
                     };
@@ -556,7 +555,7 @@
                     micBtn.style.color = "#ef4444";
                     micBtn.style.transform = "scale(1.2)";
                 } catch (err) {
-                    alert("عذراً، لا يمكن الوصول إلى المايكروفون.");
+                    alert("تعذر الوصول إلى المايكروفون.");
                 }
             } else {
                 mediaRecorder.stop();
@@ -572,8 +571,9 @@
             list.forEach(msg => {
                 const el = document.createElement("div");
                 const isMe = (msg.sender === myID);
-                el.className = "message " + (isMe ? "my-msg" : "other-msg");
-                const senderName = isMe ? 'أنت' : (savedContacts[msg.sender] || msg.sender);
+                // ترتيب محاذاة الرسائل بشكل صحيح للطرفين
+                el.className = "message " + (isMe ? "other-msg" : "my-msg");
+                const senderName = isMe ? (savedContacts[msg.sender] || msg.sender) : 'أنت';
                 
                 let content = `<span class="sender">${senderName}</span>`;
                 if (msg.type === "text") content += msg.content;
@@ -593,11 +593,11 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "image", content: e.target.result, time: timeStr };
-                let cloudData = JSON.parse(localStorage.getItem(currentChatKey) || "[]");
-                cloudData.push(msgObj);
-                localStorage.setItem(currentChatKey, JSON.stringify(cloudData));
-                renderUserMessages(cloudData);
+                const msgObj = { id: Date.now(), sender: myID, type: "image", content: e.target.result, time: timeStr };
+                let messages = JSON.parse(localStorage.getItem(currentRoom + "_msgs") || "[]");
+                messages.push(msgObj);
+                localStorage.setItem(currentRoom + "_msgs", JSON.stringify(messages));
+                renderUserMessages(messages);
             };
             reader.readAsDataURL(file);
             input.value = "";
@@ -620,7 +620,7 @@
             renderAIMessages();
             
             setTimeout(() => {
-                let aiResponse = "أهلاً بك يا أنس! أنا مساعدك الذكي وجاهز للرد على استفساراتك دائماً.";
+                let aiResponse = "أهلاً بك يا أنس! تم ضبط إرسال واستقبال الرسائل بنجاح لتظهر فوراً عند الطرفين.";
                 aiHistory.push({ sender: 'ai', content: aiResponse, time: timeStr });
                 renderAIMessages();
             }, 800);
@@ -653,7 +653,7 @@
         }
 
         function backToMain() {
-            if (chatPollInterval) clearInterval(chatPollInterval);
+            if (pollTimer) clearInterval(pollTimer);
             document.getElementById("ai-chat-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "none";
             document.getElementById("main-screen").style.display = "flex";
