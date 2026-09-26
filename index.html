@@ -135,7 +135,7 @@
 
         .message .time { font-size: 9px; opacity: 0.6; display: block; text-align: left; margin-top: 4px; }
 
-        .message img, .message audio {
+        .message img, .message audio, .message video {
             max-width: 100%;
             border-radius: 8px;
             margin-top: 5px;
@@ -213,7 +213,7 @@
             
             <button id="mic-btn" class="btn-action btn-mic" onclick="toggleRecording()">🎤</button>
 
-            <input type="text" id="msg-input" placeholder="اكتب رسالة (أو 'ذكاء' لـ AI)..." onkeypress="handleKeyPress(event)" />
+            <input type="text" id="msg-input" placeholder="اكتب رسالة (أو 'صورة سيارة' أو 'فيديو قطة')..." onkeypress="handleKeyPress(event)" />
             <button class="btn-action" onclick="sendTextMessage()">➤</button>
         </div>
     </div>
@@ -274,6 +274,42 @@
             input.value = "";
 
             const lowerText = text.toLowerCase();
+
+            // 1. طلب إنشاء صورة بواسطة الذكاء الاصطناعي
+            if (lowerText.startsWith("صورة ") || lowerText.startsWith("ارسم ") || lowerText.startsWith("صوره ")) {
+                const promptQuery = text.replace(/^(صورة|ارسم|صوره)\s+/i, "");
+                
+                pubnub.publish({
+                    channel: currentRoom,
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "🎨 جاري رسم ورسم الصورة لك...", time: timeStr }
+                });
+
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptQuery)}?width=512&height=512&nologo=true`;
+
+                pubnub.publish({
+                    channel: currentRoom,
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'image', content: imageUrl, time: timeStr }
+                });
+                return;
+            }
+
+            // 2. طلب البحث عن فيديو
+            if (lowerText.startsWith("فيديو ") || lowerText.startsWith("فيديو لـ")) {
+                const query = text.replace(/^(فيديو|فيديو لـ)\s+/i, "");
+
+                pubnub.publish({
+                    channel: currentRoom,
+                    message: { 
+                        sender: "🤖 الذكاء الاصطناعي", 
+                        type: 'ai', 
+                        content: `🎬 يمكنك مشاهدة فيديوهات عن (${query}) مباشرة عبر يوتيوب: <br><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query)}" target="_blank" style="color: yellow; font-weight: bold;">اضغط هنا لمشاهدة الفيديوهات</a>`, 
+                        time: timeStr 
+                    }
+                });
+                return;
+            }
+
+            // 3. المحادثة النصية العادية مع الذكاء الاصطناعي
             if (lowerText.startsWith("ذكاء ") || lowerText.startsWith("ai ")) {
                 const promptQuery = text.replace(/^(ذكاء|ai)\s+/i, "");
                 
@@ -309,7 +345,6 @@
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    // تصغير حجم الصورة حتى لا يتجاوز الحجم المسموح
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     const maxWidth = 400;
