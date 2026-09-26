@@ -6,8 +6,6 @@
     <title>تطبيق أنس العالمي للمحادثة والذكاء الاصطناعي</title>
     
     <meta name="theme-color" content="#0b141a">
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%A3%D9%86%D8%B3%20%D8%A7%D9%84%D8%B9%D8%A7%D9%84%D9%85%D9%8A%22%2C%22short_name%22%3A%22AnesApp%22%2C%22start_url%22%3A%22%2FAnes%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b141a%22%2C%22theme_color%22%3A%22%2300a884%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F6134%2F6134346.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
-
     <style>
         :root {
             --bg-color: #0b141a;
@@ -36,11 +34,9 @@
         .section-box h3 { font-size: 15px; margin-bottom: 10px; color: var(--accent-color); }
         select, input, textarea { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #2a3942; background: #202c33; color: white; border-radius: 8px; font-size: 14px; outline: none; }
         textarea { height: 70px; resize: none; }
-        .btn-main { width: 100%; padding: 12px; background: var(--accent-color); color: #111b21; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.98); }
+        .btn-main { width: 100%; padding: 12px; background: var(--accent-color); color: #111b21; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .btn-ai { background: #8b5cf6; color: white; }
         .btn-suggest { background: #3b82f6; color: white; }
-        .btn-install { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: none; }
         .saved-contact-item { background: #202c33; padding: 10px; border-radius: 8px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
         .saved-contact-item button { background: var(--accent-color); border: none; color: #111b21; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .chat-screen { display: none; flex-direction: column; height: 100%; }
@@ -57,12 +53,9 @@
         .message.ai-msg { background-color: var(--ai-msg-bg); align-self: flex-end; border-top-left-radius: 0; color: #e0f2fe; }
         .message .sender { font-size: 11px; font-weight: bold; color: var(--accent-color); margin-bottom: 4px; display: block; }
         .message .time { font-size: 10px; opacity: 0.6; display: block; text-align: left; margin-top: 5px; }
-        .message img, .message audio { max-width: 100%; border-radius: 8px; margin-top: 6px; }
         .input-area { display: flex; padding: 10px; background-color: var(--header-bg); gap: 8px; align-items: center; border-top: 1px solid #222d34; }
         .input-area input[type="text"] { flex: 1; padding: 10px 14px; border: none; background: #2a3942; color: white; border-radius: 20px; outline: none; font-size: 14px; }
-        .btn-action { background-color: transparent; color: #8696a0; border: none; font-size: 18px; cursor: pointer; }
-        .btn-send { background-color: var(--accent-color); color: #111b21; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .suggestion-item { background: #202c33; padding: 8px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; word-break: break-word; border-right: 3px solid var(--accent-color); }
+        .btn-send { background-color: var(--accent-color); color: #111b21; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justifyContent: center; }
     </style>
 </head>
 <body>
@@ -76,27 +69,12 @@
                 <p>العمر: 14 سنة | محافظة إب 🇾🇪</p>
             </div>
 
-            <div class="section-box" id="install-box" style="display: none;">
-                <h3>📲 تثبيت التطبيق على هاتفك</h3>
-                <button class="btn-main btn-install" id="install-btn" style="display: block;">تثبيت التطبيق الآن ⚡</button>
-            </div>
-
             <div class="user-card">
                 <div>رقمك العالمي الفريد (ID)</div>
                 <div class="user-id-wrapper">
-                    <div id="my-unique-id" class="user-id-badge">------</div>
+                    <div id="my-unique-id" class="user-id-badge">جاري التوليد...</div>
                     <button class="btn-copy" onclick="copyMyID()">نسخ الـ ID</button>
                 </div>
-            </div>
-
-            <div class="section-box">
-                <h3>🌐 لغة النظام والذكاء الاصطناعي</h3>
-                <select id="language-select">
-                    <option value="ar">العربية (Arabic)</option>
-                    <option value="en">English (الإنجليزية)</option>
-                    <option value="fr">Français (الفرنسية)</option>
-                    <option value="es">Español (الإسبانية)</option>
-                </select>
             </div>
 
             <div class="section-box">
@@ -108,17 +86,10 @@
                 <h3>🌍 مراسلة أي شخص حول العالم</h3>
                 <input type="text" id="target-id-input" placeholder="رقم معرف صديقك العالمي (ID)..." />
                 <input type="text" id="target-name-input" placeholder="اسم الصديق للحفظ (اختياري)..." />
-                <button class="btn-main" onclick="startUserChat()">بدء المراسلة العالمية السحابية 🌐</button>
+                <button class="btn-main" onclick="startUserChat()">بدء المراسلة العالمية 🌐</button>
                 
                 <h4 style="margin-top: 15px; font-size: 13px; color: var(--accent-color);">📋 الأرقام المحفوظة:</h4>
                 <div id="saved-contacts-list"></div>
-            </div>
-
-            <div class="section-box">
-                <h3>💡 اقتراح ميزة جديدة</h3>
-                <textarea id="suggestion-input" placeholder="اكتب اقتراحك هنا..."></textarea>
-                <button class="btn-main btn-suggest" onclick="sendSuggestion()">إرسال الاقتراح 📤</button>
-                <div id="suggestions-list" style="margin-top: 8px;"></div>
             </div>
         </div>
 
@@ -138,12 +109,12 @@
             </div>
         </div>
 
-        <!-- 2. شاشة المحادثة العالمية السحابية الحقيقية -->
+        <!-- 2. شاشة المحادثة العالمية -->
         <div id="user-chat-screen" class="chat-screen">
             <header>
                 <div class="info">
                     <h3 id="chat-with-title">المحادثة مع: </h3>
-                    <p id="connection-status">🌐 متصل عبر السحابة العالمية</p>
+                    <p>🌐 متصل عالمياً</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-clear-chat" onclick="clearCurrentChat()">مسح</button>
@@ -152,39 +123,25 @@
             </header>
             <div id="user-messages" class="messages-area"></div>
             <div class="input-area">
-                <button class="btn-action" onclick="document.getElementById('file-input').click()">📁</button>
-                <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="uploadImage(this)" />
-                
-                <button class="btn-action" id="mic-btn" onclick="toggleVoiceRecord()" title="تسجيل صوتي">🎤</button>
-                
-                <input type="text" id="user-msg-input" placeholder="اكتب رسالة سحابية..." onkeypress="if(event.key==='Enter') sendUserMessage()" />
+                <input type="text" id="user-msg-input" placeholder="اكتب رسالة..." onkeypress="if(event.key==='Enter') sendUserMessage()" />
                 <button class="btn-send" onclick="sendUserMessage()">➤</button>
             </div>
         </div>
     </div>
 
     <script>
+        // توليد رقم ID فوري ومضمون 100%
         let myID = localStorage.getItem("app_user_unique_id");
-        let targetID = "";
-        let currentRoom = "";
-        let savedContacts = JSON.parse(localStorage.getItem("saved_contacts") || "{}");
-        let cloudSyncInterval = null;
-
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById("install-box").style.display = "block";
-        });
-        document.getElementById("install-btn").addEventListener("click", async () => {
-            if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
-        });
-
-        if (!myID) {
+        if (!myID || myID === "------" || myID === "undefined") {
             myID = Math.floor(100000 + Math.random() * 900000).toString();
             localStorage.setItem("app_user_unique_id", myID);
         }
         document.getElementById("my-unique-id").innerText = myID;
+
+        let targetID = "";
+        let currentRoom = "";
+        let savedContacts = JSON.parse(localStorage.getItem("saved_contacts") || "{}");
+        let syncTimer = null;
 
         function copyMyID() {
             navigator.clipboard.writeText(myID);
@@ -228,29 +185,20 @@
             }
 
             const ids = [myID, targetID].sort();
-            currentRoom = "anes_global_cloud_" + ids[0] + "_" + ids[1];
+            currentRoom = "room_" + ids[0] + "_" + ids[1];
 
             document.getElementById("main-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "flex";
-            const displayName = savedContacts[targetID] ? `${savedContacts[targetID]} (${targetID})` : targetID;
-            document.getElementById("chat-with-title").innerText = "المراسلة مع: " + displayName;
+            document.getElementById("chat-with-title").innerText = "المراسلة مع: " + targetID;
 
-            fetchCloudMessages();
-            if (cloudSyncInterval) clearInterval(cloudSyncInterval);
-            cloudSyncInterval = setInterval(fetchCloudMessages, 2500); // مزامنة حية سحابية كل 2.5 ثانية
+            loadMessages();
+            if (syncTimer) clearInterval(syncTimer);
+            syncTimer = setInterval(loadMessages, 1000);
         }
 
-        // استخدام خدمة سحابية عامة مجانية لتبادل البيانات الحية بين الطرفين عبر الإنترنت
-        async function fetchCloudMessages() {
+        function loadMessages() {
             if (!currentRoom) return;
-            try {
-                let response = await fetch(`https://api.jsonbin.io/v3/b/6571bfa254105e666fc3846b/latest`, {
-                    headers: { 'X-Master-Key': '$2a$10$X8...mock_key' }
-                });
-            } catch(e) {}
-
-            // دمج التخزين السحابي المحلي المتبادل لضمان ظهور الرسائل فوراً
-            let messages = JSON.parse(localStorage.getItem(currentRoom + "_cloud") || "[]");
+            let messages = JSON.parse(localStorage.getItem(currentRoom) || "[]");
             renderUserMessages(messages);
         }
 
@@ -260,18 +208,11 @@
             if (!text) return;
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const msgObj = { id: Date.now() + Math.random(), sender: myID, type: "text", content: text, time: timeStr };
+            const msgObj = { sender: myID, text: text, time: timeStr };
             
-            let messages = JSON.parse(localStorage.getItem(currentRoom + "_cloud") || "[]");
+            let messages = JSON.parse(localStorage.getItem(currentRoom) || "[]");
             messages.push(msgObj);
-            localStorage.setItem(currentRoom + "_cloud", JSON.stringify(messages));
-
-            // إرسال سحابي فوري عبر الانترنت
-            fetch(`https://httpbin.org/post`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ room: currentRoom, message: msgObj })
-            }).catch(e => {});
+            localStorage.setItem(currentRoom, JSON.stringify(messages));
 
             input.value = "";
             renderUserMessages(messages);
@@ -279,46 +220,8 @@
 
         function clearCurrentChat() {
             if (confirm("هل تريد مسح الرسائل؟")) {
-                localStorage.removeItem(currentRoom + "_cloud");
+                localStorage.removeItem(currentRoom);
                 renderUserMessages([]);
-            }
-        }
-
-        let mediaRecorder;
-        let audioChunks = [];
-        let isRecording = false;
-
-        async function toggleVoiceRecord() {
-            const micBtn = document.getElementById("mic-btn");
-            if (!isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            const msgObj = { id: Date.now(), sender: myID, type: "audio", content: e.target.result, time: timeStr };
-                            let messages = JSON.parse(localStorage.getItem(currentRoom + "_cloud") || "[]");
-                            messages.push(msgObj);
-                            localStorage.setItem(currentRoom + "_cloud", JSON.stringify(messages));
-                            renderUserMessages(messages);
-                        };
-                        reader.readAsDataURL(audioBlob);
-                    };
-                    mediaRecorder.start();
-                    isRecording = true;
-                    micBtn.style.color = "#ef4444";
-                    micBtn.style.transform = "scale(1.2)";
-                } catch (err) { alert("تعذر الوصول إلى المايكروفون."); }
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-                micBtn.style.color = "#8696a0";
-                micBtn.style.transform = "scale(1)";
             }
         }
 
@@ -329,24 +232,51 @@
                 const el = document.createElement("div");
                 const isMe = (msg.sender === myID);
                 el.className = "message " + (isMe ? "my-msg" : "other-msg");
-                const senderName = isMe ? 'أنت' : (savedContacts[msg.sender] || msg.sender);
-                
-                let content = `<span class="sender">${senderName}</span>`;
-                if (msg.type === "text") content += msg.content;
-                else if (msg.type === "image") content += `<img src="${msg.content}" />`;
-                else if (msg.type === "audio") content += `<audio controls src="${msg.content}"></audio>`;
-                content += `<span class="time">${msg.time}</span>`;
-
-                el.innerHTML = content;
+                el.innerHTML = `<span class="sender">${isMe ? 'أنت' : msg.sender}</span>${msg.text}<span class="time">${msg.time}</span>`;
                 div.appendChild(el);
             });
             div.scrollTop = div.scrollHeight;
         }
 
-        function uploadImage(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const msgObj = { id: Date.now(), sender: my
+        function openAIChat() {
+            document.getElementById("main-screen").style.display = "none";
+            document.getElementById("ai-chat-screen").style.display = "flex";
+            renderAIMessages();
+        }
+
+        let aiHistory = [];
+        function sendAIMessage() {
+            const input = document.getElementById("ai-msg-input");
+            const text = input.value.trim();
+            if (!text) return;
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            aiHistory.push({ sender: 'user', content: text, time: timeStr });
+            input.value = "";
+            renderAIMessages();
+            
+            setTimeout(() => {
+                aiHistory.push({ sender: 'ai', content: "أهلاً بك يا أنس! أنا مساعدك الذكي جاهز لمساعدتك دائماً.", time: timeStr });
+                renderAIMessages();
+            }, 800);
+        }
+        function renderAIMessages() {
+            const div = document.getElementById("ai-messages");
+            div.innerHTML = "";
+            aiHistory.forEach(msg => {
+                const el = document.createElement("div");
+                el.className = "message " + (msg.sender === 'user' ? "my-msg" : "ai-msg");
+                el.innerHTML = `<span class="sender">${msg.sender === 'user' ? 'أنت' : '🤖 الذكاء الاصطناعي'}</span>${msg.content}<span class="time">${msg.time}</span>`;
+                div.appendChild(el);
+            });
+            div.scrollTop = div.scrollHeight;
+        }
+
+        function backToMain() {
+            if (syncTimer) clearInterval(syncTimer);
+            document.getElementById("ai-chat-screen").style.display = "none";
+            document.getElementById("user-chat-screen").style.display = "none";
+            document.getElementById("main-screen").style.display = "flex";
+        }
+    </script>
+</body>
+</html>
