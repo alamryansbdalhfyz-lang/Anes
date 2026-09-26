@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المحادثة والذكاء الاصطناعي</title>
+    <title>تطبيق أنس العالمي للمحادثة والذكاء الاصطناعي</title>
     
-    <!-- إعدادات تطبيق الويب التقدمي (PWA) للأيقونة والتثبيت -->
+    <!-- إعدادات تطبيق الويب التقدمي (PWA) -->
     <meta name="theme-color" content="#0b141a">
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%A3%D9%86%D8%B3%20%D9%84%D9%84%D9%85%D8%AD%D8%A7%D8%AF%D8%AB%D8%A9%22%2C%22short_name%22%3A%22AnesApp%22%2C%22start_url%22%3A%22%2FAnes%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b141a%22%2C%22theme_color%22%3A%22%2300a884%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F6134%2F6134346.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20%D8%A3%D9%86%D8%B3%20%D8%A7%D9%84%D8%B9%D8%A7%D9%84%D9%85%D9%8A%22%2C%22short_name%22%3A%22AnesApp%22%2C%22start_url%22%3A%22%2FAnes%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b141a%22%2C%22theme_color%22%3A%22%2300a884%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F6134%2F6134346.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
 
     <style>
         :root {
@@ -19,7 +19,6 @@
             --ai-msg-bg: #1e3a5f;
             --text-color: #e9edef;
             --accent-color: #00a884;
-            --creator-bg: #1f2c34;
         }
 
         * {
@@ -49,7 +48,6 @@
             position: relative;
         }
 
-        /* الشاشة الرئيسية */
         #main-screen {
             flex: 1;
             display: flex;
@@ -58,7 +56,6 @@
             overflow-y: auto;
         }
 
-        /* بطاقة صانع التطبيق */
         .creator-card {
             background: linear-gradient(135deg, #1f2c34, #111b21);
             border: 1px solid var(--accent-color);
@@ -141,23 +138,31 @@
             margin-top: 5px;
         }
 
-        .btn-ai {
-            background: #8b5cf6;
-            color: white;
+        .btn-ai { background: #8b5cf6; color: white; }
+        .btn-suggest { background: #3b82f6; color: white; }
+        .btn-install { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: none; }
+
+        .saved-contact-item {
+            background: #202c33;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
         }
 
-        .btn-suggest {
-            background: #3b82f6;
-            color: white;
+        .saved-contact-item button {
+            background: var(--accent-color);
+            border: none;
+            color: #111b21;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        .btn-install {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-            display: none; /* يظهر فقط عندما يكون التطبيق قابلاً للتثبيت */
-        }
-
-        /* شاشات المحادثة */
         .chat-screen {
             display: none;
             flex-direction: column;
@@ -185,19 +190,6 @@
             cursor: pointer;
         }
 
-        .instructions-banner {
-            background: #1e293b;
-            padding: 10px 14px;
-            font-size: 12px;
-            line-height: 1.4;
-            border-bottom: 1px solid #334155;
-            color: #94a3b8;
-        }
-
-        .instructions-banner strong {
-            color: #38bdf8;
-        }
-
         .messages-area {
             flex: 1;
             padding: 15px;
@@ -223,7 +215,7 @@
         .message .sender { font-size: 11px; font-weight: bold; color: var(--accent-color); margin-bottom: 4px; display: block; }
         .message .time { font-size: 10px; opacity: 0.6; display: block; text-align: left; margin-top: 5px; }
 
-        .message img {
+        .message img, .message audio {
             max-width: 100%;
             border-radius: 8px;
             margin-top: 6px;
@@ -283,29 +275,27 @@
 
         <!-- الشاشة الرئيسية -->
         <div id="main-screen">
-            <!-- بطاقة صانع التطبيق -->
             <div class="creator-card">
-                <h2>📱 صانع التطبيق</h2>
+                <h2>📱 تطبيق أنس العالمي</h2>
                 <p><strong>أنس عبد الحفيظ</strong> (الطفل اليماني)</p>
                 <p>العمر: 14 سنة | محافظة إب 🇾🇪</p>
             </div>
 
-            <!-- زر تثبيت التطبيق على الهاتف -->
+            <!-- زر تثبيت التطبيق -->
             <div class="section-box" id="install-box" style="display: none;">
                 <h3>📲 تثبيت التطبيق على هاتفك</h3>
-                <p style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">اجعل التطبيق يظهر كأيقونة مستقلة على شاشة هاتفك الرئيسية.</p>
                 <button class="btn-main btn-install" id="install-btn" style="display: block;">تثبيت التطبيق الآن ⚡</button>
             </div>
 
             <!-- بطاقة المستخدم -->
             <div class="user-card">
-                <div>رقمك الفريد (ID)</div>
+                <div>رقمك العالمي الفريد (ID)</div>
                 <div id="my-unique-id" class="user-id-badge">------</div>
             </div>
 
             <!-- إعدادات اللغة -->
             <div class="section-box">
-                <h3>🌐 لغة التحدث والمحادثة</h3>
+                <h3>🌐 لغة النظام والذكاء الاصطناعي</h3>
                 <select id="language-select">
                     <option value="ar">العربية (Arabic)</option>
                     <option value="en">English (الإنجليزية)</option>
@@ -314,56 +304,49 @@
                 </select>
             </div>
 
-            <!-- خيار الذكاء الاصطناعي -->
+            <!-- الذكاء الاصطناعي -->
             <div class="section-box">
                 <h3>🤖 قسم الذكاء الاصطناعي</h3>
-                <p style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">مساعد ذكي توليدي للرسم والإجابة على الأسئلة.</p>
                 <button class="btn-main btn-ai" onclick="openAIChat()">فتح محادثة الذكاء الاصطناعي 🚀</button>
             </div>
 
-            <!-- خيار محادثة مستخدم -->
+            <!-- مراسلة حول العالم -->
             <div class="section-box">
-                <h3>💬 محادثة شخص بركمه</h3>
-                <input type="text" id="target-id-input" placeholder="ادخل رقم المستلم (ID)..." />
-                <button class="btn-main" onclick="startUserChat()">بدء المحادثة 📩</button>
+                <h3>🌍 مراسلة أي شخص حول العالم</h3>
+                <input type="text" id="target-id-input" placeholder="رقم معرف صديقك العالمي (ID)..." />
+                <input type="text" id="target-name-input" placeholder="اسم الصديق للحفظ (اختياري)..." />
+                <button class="btn-main" onclick="startUserChat()">بدء المراسلة العالمية 🌐</button>
+                
+                <h4 style="margin-top: 15px; font-size: 13px; color: var(--accent-color);">📋 الأرقام المحفوظة:</h4>
+                <div id="saved-contacts-list"></div>
             </div>
 
-            <!-- خيار اقتراحات التعديل -->
+            <!-- اقتراحات التعديل -->
             <div class="section-box">
-                <h3>💡 اقتراح تعديل أو ميزة</h3>
-                <textarea id="suggestion-input" placeholder="اكتب اقتراحك هنا لتطوير التطبيق..."></textarea>
+                <h3>💡 اقتراح ميزة جديدة</h3>
+                <textarea id="suggestion-input" placeholder="اكتب اقتراحك هنا..."></textarea>
                 <button class="btn-main btn-suggest" onclick="sendSuggestion()">إرسال الاقتراح 📤</button>
-                
-                <h4 style="margin-top: 10px; font-size: 12px; opacity: 0.7;">الاقتراحات المرسلة:</h4>
                 <div id="suggestions-list" style="margin-top: 5px;"></div>
             </div>
         </div>
 
-        <!-- 1. شاشة محادثة الذكاء الاصطناعي -->
+        <!-- 1. شاشة الذكاء الاصطناعي -->
         <div id="ai-chat-screen" class="chat-screen">
             <header>
                 <div class="info">
                     <h3>🤖 المساعد الذكي</h3>
-                    <p id="ai-lang-text">اللغة: العربية</p>
+                    <p id="ai-lang-text">متصل عالمياً</p>
                 </div>
                 <button onclick="backToMain()">رجوع</button>
             </header>
-
-            <div class="instructions-banner">
-                <strong>📖 طريقة الاستخدام:</strong><br>
-                • اكتب أي سؤال وسيجيبك الذكاء الاصطناعي باللغة المختارة.<br>
-                • لتوليد صورة، اكتب <code>ارسم</code> أو <code>صورة</code> متبوعة بالوصف (مثال: <i>ارسم سيارة رياضية</i>).
-            </div>
-
             <div id="ai-messages" class="messages-area"></div>
-
             <div class="input-area">
-                <input type="text" id="ai-msg-input" placeholder="اكتب سؤالاً أو طلب رسم صورة..." onkeypress="if(event.key==='Enter') sendAIMessage()" />
+                <input type="text" id="ai-msg-input" placeholder="اكتب سؤالك هنا..." onkeypress="if(event.key==='Enter') sendAIMessage()" />
                 <button class="btn-send" onclick="sendAIMessage()">➤</button>
             </div>
         </div>
 
-        <!-- 2. شاشة محادثة المستخدمين -->
+        <!-- 2. شاشة المحادثة العالمية -->
         <div id="user-chat-screen" class="chat-screen">
             <header>
                 <div class="info">
@@ -372,14 +355,14 @@
                 </div>
                 <button onclick="backToMain()">خروج</button>
             </header>
-
             <div id="user-messages" class="messages-area"></div>
-
             <div class="input-area">
                 <button class="btn-action" onclick="document.getElementById('file-input').click()">📁</button>
                 <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="uploadImage(this)" />
                 
-                <input type="text" id="user-msg-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendUserMessage()" />
+                <button class="btn-action" id="mic-btn" onclick="toggleVoiceRecord()" title="تسجيل صوتي">🎤</button>
+                
+                <input type="text" id="user-msg-input" placeholder="اكتب رسالة عالمية..." onkeypress="if(event.key==='Enter') sendUserMessage()" />
                 <button class="btn-send" onclick="sendUserMessage()">➤</button>
             </div>
         </div>
@@ -393,45 +376,33 @@
         let currentChannel = "";
         let pubnub;
         let chatHistory = {};
+        let savedContacts = JSON.parse(localStorage.getItem("saved_contacts") || "{}");
 
-        // ميزة التثبيت على شاشة الهاتف (PWA)
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById("install-box").style.display = "block";
         });
-
         document.getElementById("install-btn").addEventListener("click", async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    document.getElementById("install-box").style.display = "none";
-                }
                 deferredPrompt = null;
             }
         });
 
-        // توليد معرف فريد للمستخدم
         if (!myID) {
             myID = Math.floor(100000 + Math.random() * 900000).toString();
             localStorage.setItem("app_user_unique_id", myID);
         }
-
         document.getElementById("my-unique-id").innerText = myID;
 
-        // استعادة المحادثات
         const savedHistory = localStorage.getItem("chat_history_data");
         if (savedHistory) chatHistory = JSON.parse(savedHistory);
 
         function initPubNub() {
             if (pubnub) return;
-            pubnub = new PubNub({
-                publishKey: "demo",
-                subscribeKey: "demo",
-                userId: "user_" + myID
-            });
+            pubnub = new PubNub({ publishKey: "demo", subscribeKey: "demo", userId: "user_" + myID });
 
             pubnub.addListener({
                 message: function(m) {
@@ -439,109 +410,64 @@
                         displaySuggestion(m.message);
                     } else if (m.channel === currentChannel) {
                         saveAndDisplayMessage(m.message);
+                        if (m.message.sender !== myID) {
+                            if (window.Notification && Notification.permission === "granted") {
+                                new Notification("رسالة عالمية من " + (savedContacts[m.message.sender] || m.message.sender), { body: m.message.content });
+                            }
+                        }
                     }
                 }
             });
-
             pubnub.subscribe({ channels: ["global_app_suggestions"] });
+            if (window.Notification && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
         }
-
         initPubNub();
 
-        function getSelectedLanguageName() {
-            const lang = document.getElementById("language-select").value;
-            const langMap = { ar: "العربية", en: "English", fr: "Français", es: "Español" };
-            return langMap[lang] || "العربية";
-        }
-
-        // --- قسم الذكاء الاصطناعي ---
-        function openAIChat() {
-            document.getElementById("main-screen").style.display = "none";
-            document.getElementById("ai-chat-screen").style.display = "flex";
-            document.getElementById("ai-lang-text").innerText = "اللغة: " + getSelectedLanguageName();
-            renderAIMessages();
-        }
-
-        function sendAIMessage() {
-            const input = document.getElementById("ai-msg-input");
-            const text = input.value.trim();
-            if (!text) return;
-
-            const selectedLang = document.getElementById("language-select").value;
-            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            addAIMessageToHistory({ sender: 'user', content: text, type: 'text', time: timeStr });
-            input.value = "";
-
-            const rawText = text.toLowerCase();
-
-            if (rawText.includes("صورة") || rawText.includes("ارسم") || rawText.includes("draw") || rawText.includes("image")) {
-                let prompt = text.replace(/(صورة|ارسم|draw|image|picture|لـ|عن)/gi, "").trim();
-                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt || 'art')}?width=512&height=512&nologo=true`;
-                
-                setTimeout(() => {
-                    addAIMessageToHistory({ sender: 'ai', content: imgUrl, type: 'image', time: timeStr });
-                }, 1000);
-            } else {
-                let aiResponse = "";
-                if (selectedLang === "en") {
-                    aiResponse = "I received your message: '" + text + "'. How can I help you today?";
-                } else if (selectedLang === "fr") {
-                    aiResponse = "J'ai reçu votre message : '" + text + "'. Comment puis-je vous aider ?";
-                } else if (selectedLang === "es") {
-                    aiResponse = "He recibido tu mensaje: '" + text + "'. ¿Cómo puedo ayudarte?";
-                } else {
-                    aiResponse = "أهلاً بك! تلقيت رسالتك: '" + text + "'. كيف يمكنني مساعدتك اليوم؟";
-                }
-
-                setTimeout(() => {
-                    addAIMessageToHistory({ sender: 'ai', content: aiResponse, type: 'text', time: timeStr });
-                }, 800);
-            }
-        }
-
-        function addAIMessageToHistory(msg) {
-            if (!chatHistory["ai_chat"]) chatHistory["ai_chat"] = [];
-            chatHistory["ai_chat"].push(msg);
-            localStorage.setItem("chat_history_data", JSON.stringify(chatHistory));
-            renderAIMessages();
-        }
-
-        function renderAIMessages() {
-            const div = document.getElementById("ai-messages");
-            div.innerHTML = "";
-            const list = chatHistory["ai_chat"] || [];
-
-            list.forEach(msg => {
-                const el = document.createElement("div");
-                el.className = "message " + (msg.sender === 'user' ? "my-msg" : "ai-msg");
-                
-                let content = `<span class="sender">${msg.sender === 'user' ? 'أنت' : '🤖 الذكاء الاصطناعي'}</span>`;
-                if (msg.type === "text") content += msg.content;
-                else if (msg.type === "image") content += `<img src="${msg.content}" />`;
-                content += `<span class="time">${msg.time}</span>`;
-
-                el.innerHTML = content;
-                div.appendChild(el);
-            });
-            div.scrollTop = div.scrollHeight;
-        }
-
-        // --- قسم محادثة المستخدمين ---
-        function startUserChat() {
-            const inputVal = document.getElementById("target-id-input").value.trim();
-            if (!inputVal) {
-                alert("يرجى إدخال رقم المستلم أولاً!");
+        function renderSavedContacts() {
+            const listDiv = document.getElementById("saved-contacts-list");
+            listDiv.innerHTML = "";
+            const ids = Object.keys(savedContacts);
+            if (ids.length === 0) {
+                listDiv.innerHTML = '<p style="font-size:12px; opacity:0.6; margin-top:5px;">لا توجد أرقام محفوظة بعد.</p>';
                 return;
             }
+            ids.forEach(id => {
+                const name = savedContacts[id];
+                const item = document.createElement("div");
+                item.className = "saved-contact-item";
+                item.innerHTML = `<span>👤 ${name} (${id})</span> <button onclick="openChatWith('${id}')">مراسلة</button>`;
+                listDiv.appendChild(item);
+            });
+        }
+        renderSavedContacts();
+
+        function openChatWith(id) {
+            document.getElementById("target-id-input").value = id;
+            document.getElementById("target-name-input").value = savedContacts[id] || "";
+            startUserChat();
+        }
+
+        function startUserChat() {
+            const inputVal = document.getElementById("target-id-input").value.trim();
+            const nameVal = document.getElementById("target-name-input").value.trim();
+            if (!inputVal) { alert("يرجى إدخال رقم المستلم العالمي!"); return; }
             targetID = inputVal;
 
+            if (nameVal) {
+                savedContacts[targetID] = nameVal;
+                localStorage.setItem("saved_contacts", JSON.stringify(savedContacts));
+                renderSavedContacts();
+            }
+
             const ids = [myID, targetID].sort();
-            currentChannel = "chat_" + ids[0] + "_" + ids[1];
+            currentChannel = "global_chat_" + ids[0] + "_" + ids[1];
 
             document.getElementById("main-screen").style.display = "none";
             document.getElementById("user-chat-screen").style.display = "flex";
-            document.getElementById("chat-with-title").innerText = "المحادثة مع: " + targetID;
+            const displayName = savedContacts[targetID] ? `${savedContacts[targetID]} (${targetID})` : targetID;
+            document.getElementById("chat-with-title").innerText = "المراسلة مع: " + displayName;
             document.getElementById("my-id-sub").innerText = "رقمك: " + myID;
 
             pubnub.subscribe({ channels: [currentChannel] });
@@ -554,16 +480,46 @@
             if (!text) return;
 
             const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const msgObj = {
-                msgId: "msg_" + Date.now(),
-                sender: myID,
-                type: "text",
-                content: text,
-                time: timeStr
-            };
-
+            const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "text", content: text, time: timeStr };
             pubnub.publish({ channel: currentChannel, message: msgObj });
             input.value = "";
+        }
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        async function toggleVoiceRecord() {
+            const micBtn = document.getElementById("mic-btn");
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "audio", content: e.target.result, time: timeStr };
+                            pubnub.publish({ channel: currentChannel, message: msgObj });
+                        };
+                        reader.readAsDataURL(audioBlob);
+                    };
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.style.color = "#ef4444";
+                    micBtn.style.transform = "scale(1.2)";
+                } catch (err) {
+                    alert("عذراً، لا يمكن الوصول إلى المايكروفون.");
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.style.color = "#8696a0";
+                micBtn.style.transform = "scale(1)";
+            }
         }
 
         function saveAndDisplayMessage(msg) {
@@ -579,15 +535,16 @@
             const div = document.getElementById("user-messages");
             div.innerHTML = "";
             const list = chatHistory[currentChannel] || [];
-
             list.forEach(msg => {
                 const el = document.createElement("div");
                 const isMe = (msg.sender === myID);
                 el.className = "message " + (isMe ? "my-msg" : "other-msg");
-
-                let content = `<span class="sender">${isMe ? 'أنت' : msg.sender}</span>`;
+                const senderName = isMe ? 'أنت' : (savedContacts[msg.sender] || msg.sender);
+                
+                let content = `<span class="sender">${senderName}</span>`;
                 if (msg.type === "text") content += msg.content;
                 else if (msg.type === "image") content += `<img src="${msg.content}" />`;
+                else if (msg.type === "audio") content += `<audio controls src="${msg.content}"></audio>`;
                 content += `<span class="time">${msg.time}</span>`;
 
                 el.innerHTML = content;
@@ -599,38 +556,56 @@
         function uploadImage(input) {
             const file = input.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const msgObj = {
-                    msgId: "msg_" + Date.now(),
-                    sender: myID,
-                    type: "image",
-                    content: e.target.result,
-                    time: timeStr
-                };
+                const msgObj = { msgId: "msg_" + Date.now(), sender: myID, type: "image", content: e.target.result, time: timeStr };
                 pubnub.publish({ channel: currentChannel, message: msgObj });
             };
             reader.readAsDataURL(file);
             input.value = "";
         }
 
-        // --- قسم الاقتراحات والتنقل ---
+        function openAIChat() {
+            document.getElementById("main-screen").style.display = "none";
+            document.getElementById("ai-chat-screen").style.display = "flex";
+            renderAIMessages();
+        }
+        function sendAIMessage() {
+            const input = document.getElementById("ai-msg-input");
+            const text = input.value.trim();
+            if (!text) return;
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (!chatHistory["ai_chat"]) chatHistory["ai_chat"] = [];
+            chatHistory["ai_chat"].push({ sender: 'user', content: text, type: 'text', time: timeStr });
+            input.value = "";
+            
+            setTimeout(() => {
+                let aiResponse = "أهلاً بك يا أنس! أنا مساعدك الذكي العالمي، لقد استلمت رسالتك: " + text;
+                chatHistory["ai_chat"].push({ sender: 'ai', content: aiResponse, type: 'text', time: timeStr });
+                renderAIMessages();
+            }, 800);
+            renderAIMessages();
+        }
+        function renderAIMessages() {
+            const div = document.getElementById("ai-messages");
+            div.innerHTML = "";
+            (chatHistory["ai_chat"] || []).forEach(msg => {
+                const el = document.createElement("div");
+                el.className = "message " + (msg.sender === 'user' ? "my-msg" : "ai-msg");
+                el.innerHTML = `<span class="sender">${msg.sender === 'user' ? 'أنت' : '🤖 الذكاء الاصطناعي'}</span>${msg.content}<span class="time">${msg.time}</span>`;
+                div.appendChild(el);
+            });
+            div.scrollTop = div.scrollHeight;
+        }
+
         function sendSuggestion() {
             const input = document.getElementById("suggestion-input");
-            const text = input.value.prompt || input.value.trim();
-            if (!text) { alert("يرجى كتابة الاقتراح!"); return; }
-
-            pubnub.publish({
-                channel: "global_app_suggestions",
-                message: { sender: myID, text: text }
-            });
-
+            if (!input.value.trim()) return;
+            pubnub.publish({ channel: "global_app_suggestions", message: { sender: myID, text: input.value.trim() } });
             input.value = "";
             alert("تم إرسال اقتراحك بنجاح!");
         }
-
         function displaySuggestion(sug) {
             const listDiv = document.getElementById("suggestions-list");
             const sugEl = document.createElement("div");
