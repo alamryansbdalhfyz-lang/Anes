@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المحادثة والذكاء الاصطناعي</title>
+    <title>تطبيق المحادثة والميديا</title>
     <style>
         * {
             box-sizing: border-box;
@@ -108,7 +108,7 @@
             gap: 6px;
             align-items: center;
         }
-        #input-area input {
+        #input-area input[type="text"] {
             flex: 1;
             padding: 10px 14px;
             border: none;
@@ -125,6 +125,7 @@
             font-size: 13px;
             cursor: pointer;
         }
+        #file-input { display: none; }
     </style>
 </head>
 <body>
@@ -148,9 +149,10 @@
         </header>
         <div id="messages"></div>
         <div id="input-area">
-            <button class="btn-action" onclick="sendMedia('image')">📷 صورة</button>
-            <button class="btn-action" onclick="sendMedia('video')">🎥 فيديو</button>
-            <input type="text" id="msg-input" placeholder="اكتب رسالة (أو ابدأ بـ 'ذكاء' للتحدث للـ AI)..." onkeypress="handleKeyPress(event)" />
+            <button class="btn-action" onclick="document.getElementById('file-input').click()">📁 المعرض</button>
+            <input type="file" id="file-input" accept="image/*,video/*" onchange="uploadFromGallery(this)" />
+            
+            <input type="text" id="msg-input" placeholder="اكتب رسالة (أو 'ذكاء' لـ AI)..." onkeypress="handleKeyPress(event)" />
             <button class="btn-action" onclick="sendTextMessage()">➤</button>
         </div>
     </div>
@@ -198,7 +200,6 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // إرسال رسالة المستخدم الأصلية
             pubnub.publish({
                 channel: currentRoom,
                 message: { sender: username, type: 'text', content: text }
@@ -206,15 +207,13 @@
 
             input.value = "";
 
-            // التحقق إذا كانت الرسالة موجهة للذكاء الاصطناعي (تبدأ بكلمة ذكاء أو ai)
             const lowerText = text.toLowerCase();
             if (lowerText.startsWith("ذكاء ") || lowerText.startsWith("ai ")) {
                 const promptQuery = text.replace(/^(ذكاء|ai)\s+/i, "");
                 
-                // إظهار تنبيه جاري التفكير
                 pubnub.publish({
                     channel: currentRoom,
-                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "جاري التفكير والتوليد..." }
+                    message: { sender: "🤖 الذكاء الاصطناعي", type: 'text', content: "جاري التفكير..." }
                 });
 
                 try {
@@ -235,14 +234,45 @@
             }
         }
 
-        function sendMedia(type) {
-            const url = prompt(type === 'image' ? 'ضع رابط الصورة المباشر:' : 'ضع رابط الفيديو المباشر:');
-            if (!url) return;
+        async function uploadFromGallery(input) {
+            const file = input.files[0];
+            if (!file) return;
 
             pubnub.publish({
                 channel: currentRoom,
-                message: { sender: username, type: type, content: url }
+                message: { sender: username, type: 'text', content: "⏳ جاري رفع الملف من المعرض..." }
             });
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'ml_default');
+
+            try {
+                // رفع الملف تلقائياً لخدمة التخزين المجانية
+                const res = await fetch('https://api.cloudinary.com/v1_1/demo/auto/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.secure_url) {
+                    const isVideo = file.type.startsWith('video');
+                    pubnub.publish({
+                        channel: currentRoom,
+                        message: { 
+                            sender: username, 
+                            type: isVideo ? 'video' : 'image', 
+                            content: data.secure_url 
+                        }
+                    });
+                } else {
+                    alert("فشل الرفع، يرجى المحاولة مرة أخرى.");
+                }
+            } catch (err) {
+                alert("حدث خطأ أثناء رفع الصورة/الفيديو.");
+            }
+            
+            input.value = ""; // إعادة ضبط اختيار الملفات
         }
 
         function displayMessage(msg) {
@@ -283,5 +313,4 @@
         }
     </script>
 </body>
-  </html>
-  
+</html>
