@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق أنس العالمي للمحادثة والذكاء الاصطناعي</title>
+    <title>تطبيق وألعاب أنس العالمية</title>
     
     <meta name="theme-color" content="#0b141a">
     <style>
@@ -11,12 +11,9 @@
             --bg-color: #0b141a;
             --chat-bg: #111b21;
             --header-bg: #202c33;
-            --my-msg-bg: #005c4b;
-            --other-msg-bg: #202c33;
-            --ai-msg-bg: #1e3a5f;
             --text-color: #e9edef;
             --accent-color: #00a884;
-            --danger-color: #ef4444;
+            --game-bg: #1f2c34;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -26,256 +23,235 @@
         .creator-card { background: linear-gradient(135deg, #1f2c34, #111b21); border: 1px solid var(--accent-color); padding: 16px; border-radius: 14px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         .creator-card h2 { font-size: 18px; color: var(--accent-color); margin-bottom: 6px; }
         .creator-card p { font-size: 13px; color: #d1d5db; line-height: 1.5; }
-        .user-card { background: #202c33; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; border: 1px solid #2a3942; }
-        .user-id-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 5px; }
-        .user-id-badge { font-size: 22px; font-weight: bold; color: var(--accent-color); letter-spacing: 2px; }
-        .btn-copy { background: rgba(0, 168, 132, 0.2); border: 1px solid var(--accent-color); color: var(--accent-color); padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-        .section-box { background: #182229; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222d34; }
+        
+        .section-box { background: #182229; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222d34; text-align: center; }
         .section-box h3 { font-size: 15px; margin-bottom: 10px; color: var(--accent-color); }
-        select, input, textarea { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #2a3942; background: #202c33; color: white; border-radius: 8px; font-size: 14px; outline: none; }
-        textarea { height: 70px; resize: none; }
-        .btn-main { width: 100%; padding: 12px; background: var(--accent-color); color: #111b21; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        
+        .btn-main { width: 100%; padding: 12px; background: var(--accent-color); color: #111b21; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; }
+        .btn-game { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
         .btn-ai { background: #8b5cf6; color: white; }
-        .btn-suggest { background: #3b82f6; color: white; }
-        .saved-contact-item { background: #202c33; padding: 10px; border-radius: 8px; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-        .saved-contact-item button { background: var(--accent-color); border: none; color: #111b21; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .chat-screen { display: none; flex-direction: column; height: 100%; }
+
+        .screen { display: none; flex-direction: column; height: 100%; }
         header { background-color: var(--header-bg); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222d34; }
         header .info h3 { font-size: 15px; color: var(--accent-color); }
-        header .info p { font-size: 11px; opacity: 0.8; }
-        .header-actions { display: flex; gap: 6px; }
         header button { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
-        .btn-clear-chat { background: rgba(239, 68, 68, 0.2) !important; color: #fca5a5 !important; }
-        .messages-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: radial-gradient(circle at center, #111b21 0%, #0b141a 100%); }
-        .message { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        .message.my-msg { background-color: var(--my-msg-bg); align-self: flex-start; border-top-right-radius: 0; }
-        .message.other-msg { background-color: var(--other-msg-bg); align-self: flex-end; border-top-left-radius: 0; }
-        .message.ai-msg { background-color: var(--ai-msg-bg); align-self: flex-end; border-top-left-radius: 0; color: #e0f2fe; }
-        .message .sender { font-size: 11px; font-weight: bold; color: var(--accent-color); margin-bottom: 4px; display: block; }
-        .message .time { font-size: 10px; opacity: 0.6; display: block; text-align: left; margin-top: 5px; }
+
+        /* تنسيق شاشة اللعبة */
+        #game-canvas-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; position: relative; overflow: hidden; }
+        canvas { background: #1e293b; border-bottom: 4px solid #38bdf8; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-radius: 8px; }
+        .game-ui { display: flex; justify-content: space-between; width: 320px; padding: 10px; font-weight: bold; font-size: 14px; color: #38bdf8; }
+        .game-controls { display: flex; gap: 15px; margin-top: 15px; }
+        .btn-ctrl { width: 70px; height: 50px; background: #334155; color: white; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        .btn-ctrl:active { background: #38bdf8; color: #0f172a; }
+
+        .messages-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #111b21; }
+        .message { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .message.my-msg { background-color: #005c4b; align-self: flex-start; }
+        .message.ai-msg { background-color: #1e3a5f; align-self: flex-end; color: #e0f2fe; }
         .input-area { display: flex; padding: 10px; background-color: var(--header-bg); gap: 8px; align-items: center; border-top: 1px solid #222d34; }
         .input-area input[type="text"] { flex: 1; padding: 10px 14px; border: none; background: #2a3942; color: white; border-radius: 20px; outline: none; font-size: 14px; }
-        .btn-send { background-color: var(--accent-color); color: #111b21; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justifyContent: center; }
+        .btn-send { background-color: var(--accent-color); color: #111b21; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div id="app-container">
         <!-- الشاشة الرئيسية -->
-        <div id="main-screen">
+        <div id="main-screen" class="screen" style="display: flex;">
             <div class="creator-card">
-                <h2>📱 تطبيق أنس العالمي</h2>
-                <p><strong>أنس عبد الحفيظ</strong> (الطفل اليماني)</p>
+                <h2>🎮 مركز ألعاب وتطبيقات أنس</h2>
+                <p><strong>أنس عبد الحفيظ</strong> (المبرمج اليماني)</p>
                 <p>العمر: 14 سنة | محافظة إب 🇾🇪</p>
             </div>
 
-            <div class="user-card">
-                <div>رقمك العالمي الفريد (ID)</div>
-                <div class="user-id-wrapper">
-                    <div id="my-unique-id" class="user-id-badge">جاري التوليد...</div>
-                    <button class="btn-copy" onclick="copyMyID()">نسخ الـ ID</button>
-                </div>
+            <div class="section-box">
+                <h3>🚀 لعبة مغامرات أنس (بدون نت)</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">اقفز وتجنب العقبات واجمع النقاط!</p>
+                <button class="btn-main btn-game" onclick="openGameScreen()">ابدأ اللعب الآن 🎮</button>
             </div>
 
             <div class="section-box">
-                <h3>🤖 قسم الذكاء الاصطناعي</h3>
-                <button class="btn-main btn-ai" onclick="openAIChat()">فتح محادثة الذكاء الاصطناعي 🚀</button>
-            </div>
-
-            <div class="section-box">
-                <h3>🌍 مراسلة أي شخص حول العالم</h3>
-                <input type="text" id="target-id-input" placeholder="رقم معرف صديقك العالمي (ID)..." />
-                <input type="text" id="target-name-input" placeholder="اسم الصديق للحفظ (اختياري)..." />
-                <button class="btn-main" onclick="startUserChat()">بدء المراسلة العالمية 🌐</button>
-                
-                <h4 style="margin-top: 15px; font-size: 13px; color: var(--accent-color);">📋 الأرقام المحفوظة:</h4>
-                <div id="saved-contacts-list"></div>
+                <h3>🤖 مساعد الذكاء الاصطناعي</h3>
+                <button class="btn-main btn-ai" onclick="openAIChat()">فتح الدردشة الذكية 🧠</button>
             </div>
         </div>
 
-        <!-- 1. شاشة الذكاء الاصطناعي -->
-        <div id="ai-chat-screen" class="chat-screen">
+        <!-- شاشة اللعبة بدون نت -->
+        <div id="game-screen" class="screen">
+            <header>
+                <div class="info">
+                    <h3>🎮 لعبة أنس المغامر</h3>
+                </div>
+                <button onclick="backToMain()">خروج للقائمة</button>
+            </header>
+            <div id="game-canvas-container">
+                <div class="game-ui">
+                    <span id="score-display">النقاط: 0</span>
+                    <span id="highscore-display">الرقم القياسي: 0</span>
+                </div>
+                <canvas id="gameCanvas" width="320" height="200"></canvas>
+                <div class="game-controls">
+                    <button class="btn-ctrl" onclick="jump()">⬆️ قفز</button>
+                    <button class="btn-ctrl" onclick="resetGame()">🔄 إعادة</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- شاشة الذكاء الاصطناعي -->
+        <div id="ai-screen" class="screen">
             <header>
                 <div class="info">
                     <h3>🤖 المساعد الذكي</h3>
-                    <p>متصل عالمياً</p>
                 </div>
                 <button onclick="backToMain()">رجوع</button>
             </header>
             <div id="ai-messages" class="messages-area"></div>
             <div class="input-area">
-                <input type="text" id="ai-msg-input" placeholder="اكتب سؤالك هنا..." onkeypress="if(event.key==='Enter') sendAIMessage()" />
-                <button class="btn-send" onclick="sendAIMessage()">➤</button>
-            </div>
-        </div>
-
-        <!-- 2. شاشة المحادثة العالمية -->
-        <div id="user-chat-screen" class="chat-screen">
-            <header>
-                <div class="info">
-                    <h3 id="chat-with-title">المحادثة مع: </h3>
-                    <p>🌐 متصل عالمياً</p>
-                </div>
-                <div class="header-actions">
-                    <button class="btn-clear-chat" onclick="clearCurrentChat()">مسح</button>
-                    <button onclick="backToMain()">خروج</button>
-                </div>
-            </header>
-            <div id="user-messages" class="messages-area"></div>
-            <div class="input-area">
-                <input type="text" id="user-msg-input" placeholder="اكتب رسالة..." onkeypress="if(event.key==='Enter') sendUserMessage()" />
-                <button class="btn-send" onclick="sendUserMessage()">➤</button>
+                <input type="text" id="ai-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendAI()" />
+                <button class="btn-send" onclick="sendAI()">➤</button>
             </div>
         </div>
     </div>
 
     <script>
-        // توليد رقم ID فوري ومضمون 100%
-        let myID = localStorage.getItem("app_user_unique_id");
-        if (!myID || myID === "------" || myID === "undefined") {
-            myID = Math.floor(100000 + Math.random() * 900000).toString();
-            localStorage.setItem("app_user_unique_id", myID);
+        // تنقل بين الشاشات
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(screenId).style.display = 'flex';
         }
-        document.getElementById("my-unique-id").innerText = myID;
+        function backToMain() {
+            gameRunning = false;
+            showScreen('main-screen');
+        }
+        function openAIChat() { showScreen('ai-screen'); renderAI(); }
+        function openGameScreen() { showScreen('game-screen'); initGame(); }
 
-        let targetID = "";
-        let currentRoom = "";
-        let savedContacts = JSON.parse(localStorage.getItem("saved_contacts") || "{}");
-        let syncTimer = null;
+        // محرك اللعبة البسيط بدون نت
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
 
-        function copyMyID() {
-            navigator.clipboard.writeText(myID);
-            alert("تم نسخ رقمك العالمي (ID): " + myID);
+        let score = 0;
+        let highscore = localStorage.getItem("anes_game_highscore") || 0;
+        document.getElementById("highscore-display").innerText = "الرقم القياسي: " + highscore;
+
+        let gameRunning = false;
+        let player = { x: 30, y: 150, width: 20, height: 20, dy: 0, jumpPower: -9, gravity: 0.5, grounded: false };
+        let obstacle = { x: 320, y: 155, width: 15, height: 25, speed: 4 };
+
+        function initGame() {
+            score = 0;
+            obstacle.x = 320;
+            obstacle.speed = 4;
+            player.y = 150;
+            player.dy = 0;
+            gameRunning = true;
+            loop();
         }
 
-        function renderSavedContacts() {
-            const listDiv = document.getElementById("saved-contacts-list");
-            listDiv.innerHTML = "";
-            const ids = Object.keys(savedContacts);
-            if (ids.length === 0) {
-                listDiv.innerHTML = '<p style="font-size:12px; opacity:0.6; margin-top:5px;">لا توجد أرقام محفوظة بعد.</p>';
+        function jump() {
+            if (player.grounded) {
+                player.dy = player.jumpPower;
+                player.grounded = false;
+            }
+            if (!gameRunning) {
+                initGame();
+            }
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        function loop() {
+            if (!gameRunning) return;
+
+            // تحديث اللاعب
+            player.dy += player.gravity;
+            player.y += player.dy;
+
+            if (player.y > 150) {
+                player.y = 150;
+                player.dy = 0;
+                player.grounded = true;
+            }
+
+            // تحديث العائق
+            obstacle.x -= obstacle.speed;
+            if (obstacle.x < -20) {
+                obstacle.x = 320;
+                score += 10;
+                obstacle.speed += 0.2; // زيادة الصعوبة تدريجياً
+                if (score > highscore) {
+                    highscore = score;
+                    localStorage.setItem("anes_game_highscore", highscore);
+                    document.getElementById("highscore-display").innerText = "الرقم القياسي: " + highscore;
+                }
+            }
+            document.getElementById("score-display").innerText = "النقاط: " + score;
+
+            // كشف الاصطدام
+            if (
+                player.x < obstacle.x + obstacle.width &&
+                player.x + player.width > obstacle.x &&
+                player.y < obstacle.y + obstacle.height &&
+                player.y + player.height > obstacle.y
+            ) {
+                gameRunning = false;
+            }
+
+            // رسم الشاشة
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // رسم الأرضية
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(0, 170, canvas.width, 30);
+
+            // رسم اللاعب (مربع أنيق بلون زاهٍ)
+            ctx.fillStyle = "#38bdf8";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // رسم العائق
+            ctx.fillStyle = "#f43f5e";
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+
+            if (!gameRunning) {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "white";
+                ctx.font = "16px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("انتهت اللعبة! اضغط قفز للإعادة", canvas.width / 2, canvas.height / 2);
                 return;
             }
-            ids.forEach(id => {
-                const name = savedContacts[id];
-                const item = document.createElement("div");
-                item.className = "saved-contact-item";
-                item.innerHTML = `<span>👤 ${name} (${id})</span> <button onclick="openChatWith('${id}')">مراسلة</button>`;
-                listDiv.appendChild(item);
-            });
-        }
-        renderSavedContacts();
 
-        function openChatWith(id) {
-            document.getElementById("target-id-input").value = id;
-            document.getElementById("target-name-input").value = savedContacts[id] || "";
-            startUserChat();
+            requestAnimationFrame(loop);
         }
 
-        function startUserChat() {
-            const inputVal = document.getElementById("target-id-input").value.trim();
-            const nameVal = document.getElementById("target-name-input").value.trim();
-            if (!inputVal) { alert("يرجى إدخال رقم المستلم العالمي!"); return; }
-            targetID = inputVal;
-
-            if (nameVal) {
-                savedContacts[targetID] = nameVal;
-                localStorage.setItem("saved_contacts", JSON.stringify(savedContacts));
-                renderSavedContacts();
-            }
-
-            const ids = [myID, targetID].sort();
-            currentRoom = "room_" + ids[0] + "_" + ids[1];
-
-            document.getElementById("main-screen").style.display = "none";
-            document.getElementById("user-chat-screen").style.display = "flex";
-            document.getElementById("chat-with-title").innerText = "المراسلة مع: " + targetID;
-
-            loadMessages();
-            if (syncTimer) clearInterval(syncTimer);
-            syncTimer = setInterval(loadMessages, 1000);
-        }
-
-        function loadMessages() {
-            if (!currentRoom) return;
-            let messages = JSON.parse(localStorage.getItem(currentRoom) || "[]");
-            renderUserMessages(messages);
-        }
-
-        function sendUserMessage() {
-            const input = document.getElementById("user-msg-input");
+        // دردشة الذكاء الاصطناعي البسيطة
+        let aiChats = [{ sender: 'ai', text: 'أهلاً بك يا أنس في قسم الذكاء الاصطناعي والألعاب!' }];
+        function sendAI() {
+            const input = document.getElementById("ai-input");
             const text = input.value.trim();
             if (!text) return;
-
-            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const msgObj = { sender: myID, text: text, time: timeStr };
-            
-            let messages = JSON.parse(localStorage.getItem(currentRoom) || "[]");
-            messages.push(msgObj);
-            localStorage.setItem(currentRoom, JSON.stringify(messages));
-
+            aiChats.push({ sender: 'user', text: text });
             input.value = "";
-            renderUserMessages(messages);
-        }
+            renderAI();
 
-        function clearCurrentChat() {
-            if (confirm("هل تريد مسح الرسائل؟")) {
-                localStorage.removeItem(currentRoom);
-                renderUserMessages([]);
-            }
-        }
-
-        function renderUserMessages(list) {
-            const div = document.getElementById("user-messages");
-            div.innerHTML = "";
-            list.forEach(msg => {
-                const el = document.createElement("div");
-                const isMe = (msg.sender === myID);
-                el.className = "message " + (isMe ? "my-msg" : "other-msg");
-                el.innerHTML = `<span class="sender">${isMe ? 'أنت' : msg.sender}</span>${msg.text}<span class="time">${msg.time}</span>`;
-                div.appendChild(el);
-            });
-            div.scrollTop = div.scrollHeight;
-        }
-
-        function openAIChat() {
-            document.getElementById("main-screen").style.display = "none";
-            document.getElementById("ai-chat-screen").style.display = "flex";
-            renderAIMessages();
-        }
-
-        let aiHistory = [];
-        function sendAIMessage() {
-            const input = document.getElementById("ai-msg-input");
-            const text = input.value.trim();
-            if (!text) return;
-            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            aiHistory.push({ sender: 'user', content: text, time: timeStr });
-            input.value = "";
-            renderAIMessages();
-            
             setTimeout(() => {
-                aiHistory.push({ sender: 'ai', content: "أهلاً بك يا أنس! أنا مساعدك الذكي جاهز لمساعدتك دائماً.", time: timeStr });
-                renderAIMessages();
-            }, 800);
+                aiChats.push({ sender: 'ai', text: 'أنا سعيد جداً بلعبتك يا أنس! استمر في الإبداع.' });
+                renderAI();
+            }, 600);
         }
-        function renderAIMessages() {
+        function renderAI() {
             const div = document.getElementById("ai-messages");
             div.innerHTML = "";
-            aiHistory.forEach(msg => {
+            aiChats.forEach(c => {
                 const el = document.createElement("div");
-                el.className = "message " + (msg.sender === 'user' ? "my-msg" : "ai-msg");
-                el.innerHTML = `<span class="sender">${msg.sender === 'user' ? 'أنت' : '🤖 الذكاء الاصطناعي'}</span>${msg.content}<span class="time">${msg.time}</span>`;
+                el.className = "message " + (c.sender === 'user' ? "my-msg" : "ai-msg");
+                el.innerText = c.text;
                 div.appendChild(el);
             });
             div.scrollTop = div.scrollHeight;
-        }
-
-        function backToMain() {
-            if (syncTimer) clearInterval(syncTimer);
-            document.getElementById("ai-chat-screen").style.display = "none";
-            document.getElementById("user-chat-screen").style.display = "none";
-            document.getElementById("main-screen").style.display = "flex";
         }
     </script>
 </body>
